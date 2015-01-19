@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.h"
 
-#include "../relation.h"
+#include "../src/relation.h"
 
 TEST_CASE("Relations are created correctly") {
   Relation r("data/simple.txt", "simple", {"a", "b"});
