@@ -10,11 +10,12 @@ public:
   Relation(const std::string& filename, std::string relation_name, std::vector<std::string> attrs);
   ~Relation() {}
 
-  Relation* Project(std::vector<std::string> attrs); 
+  Relation* Project(std::vector<std::string> attrs);
   Relation* LeftSemiJoin(Relation relation);
+  int size();
 private:
   std::vector<std::string> attrs_;
   std::string relation_name_;
-  std::vector<std::vector<int>> tuples_; 
+  std::vector<std::vector<int>> tuples_;
 };
 #endif /* __DATABASE_H__ */

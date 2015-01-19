@@ -5,7 +5,7 @@ using namespace std;
 
 Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name) {
   ifstream ifs(filename);
-  
+
   string line;
   while (getline(ifs, line)) {
     istringstream iss(line);
@@ -18,7 +18,7 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
       throw runtime_error("tuple length does not match attributes length");
     }
     tuples_.push_back(tuple);
-  } 
+  }
 }
 
 Relation* Relation::Project(vector<string> attrs) {
@@ -27,4 +27,8 @@ Relation* Relation::Project(vector<string> attrs) {
 
 Relation* Relation::LeftSemiJoin(Relation relation) {
   return NULL;
+}
+
+int Relation::size() {
+  return tuples_.size();
 }
