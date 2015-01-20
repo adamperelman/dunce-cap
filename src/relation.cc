@@ -1,6 +1,8 @@
 #include "relation.h"
 #include <sstream>
 #include <fstream>
+#include <map>
+
 using namespace std;
 
 Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name) {
@@ -53,8 +55,33 @@ Relation* Relation::Project(const set<string>& attrs) const {
   return projection;
 }
 
-Relation* Relation::LeftSemiJoin(Relation relation) const {
-  return NULL;
+Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>& attrs) const {
+  map<int,int> tuple_index_to_val;
+  for (int i = 0; i < attrs_.size(); ++i) {
+    auto it = find(attrs.begin(), attrs.end(), attrs_[i]);
+    if (it != attrs.end()) {
+      tuple_index_to_val[i] = tuple[it - attrs.begin()];
+    } 
+  }
+
+  Relation* result = new Relation(attrs_);
+  for (const vector<int>& t : tuples_)  {
+    bool insert_tuple = true;
+    for (int i = 0 ; i < t.size(); ++i) {
+      if (tuple_index_to_val.count(i) && tuple_index_to_val[i] != t[i]) {
+        insert_tuple = false;
+        break;
+      }
+    }
+    if (insert_tuple) {
+      result->AddTuple(t);
+    }
+  }
+  return result;
+}
+
+const vector<string>& Relation::attrs() {
+  return attrs_;
 }
 
 int Relation::size() const {
@@ -62,5 +89,5 @@ int Relation::size() const {
 }
 
 bool Relation::contains(const std::vector<int>& tuple) const {
-  return false;
+  return tuples_.find(tuple) != tuples_.end();
 }

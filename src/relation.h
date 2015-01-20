@@ -14,9 +14,10 @@ public:
 
   void AddTuple(std::vector<int> tuple);
   Relation* Project(const std::set<std::string>& attrs) const;
-  Relation* LeftSemiJoin(Relation relation) const;
+  Relation* LeftSemiJoin(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
   int size() const;
   bool contains(const std::vector<int>& tuple) const;
+  const std::vector<std::string>& attrs();
 private:
   std::vector<std::string> attrs_;
   std::string relation_name_;
