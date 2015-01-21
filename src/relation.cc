@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <cassert>
 #include <map>
 
 using namespace std;
@@ -27,8 +28,28 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
 Relation::Relation(vector<string> attrs): attrs_(attrs) {
 }
 
+Relation::Relation(vector<string> attrs, set<vector<int>> tuples): attrs_(attrs), tuples_(tuples) {
+}
+
 void Relation::AddTuple(vector<int> tuple) {
   tuples_.insert(tuple);
+}
+
+Relation* Relation::Intersect(const vector<Relation>& relations) {
+  for (const Relation& relation : relations) {
+    assert(relation.attrs().size() == 1);
+  }
+
+  set<vector<int>> intersection(relations.at(0).tuples_);
+  for (int i = 1; i < relations.size(); i++) {
+    set<vector<int>> temp;
+    set_intersection(intersection.begin(), intersection.end(),
+                     relations[i].tuples_.begin(), relations[i].tuples_.end(),
+                     inserter(temp, temp.begin()));
+    intersection = temp;
+  }
+
+  return new Relation(relations[0].attrs(), intersection);
 }
 
 Relation* Relation::Project(const set<string>& attrs) const {
@@ -120,7 +141,7 @@ Relation* Relation::SortedByAttributes() {
   return result;
 }
 
-const vector<string>& Relation::attrs() {
+const vector<string>& Relation::attrs() const {
   return attrs_;
 }
 

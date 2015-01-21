@@ -10,7 +10,10 @@ class Relation {
 public:
   Relation(const std::string& filename, std::string relation_name, std::vector<std::string> attrs);
   Relation(std::vector<std::string> attrs);
+  Relation(std::vector<std::string> attrs, std::set<std::vector<int>> tuples);
   ~Relation() {}
+
+  static Relation* Intersect(const std::vector<Relation>& relations);
 
   void AddTuple(std::vector<int> tuple);
   Relation* Project(const std::set<std::string>& attrs) const;
@@ -21,7 +24,7 @@ public:
 
   int size() const;
   bool contains(const std::vector<int>& tuple) const;
-  const std::vector<std::string>& attrs();
+  const std::vector<std::string>& attrs() const;
 
 private:
   std::vector<std::string> attrs_;
