@@ -49,11 +49,11 @@ TEST_CASE("Cartersian product with a single tuple") {
 
 TEST_CASE("Sort attrs in relation in dictionary order") {
   Relation r("data/triples.txt", "simple", {"c", "a", "b"});
-  r.SortByAttributes();
+  Relation* result = r.SortedByAttributes();
   vector<string> expected_attrs({"a", "b", "c"});
-  REQUIRE(r.attrs() == expected_attrs);
-  REQUIRE(r.contains({2, 3, 1}));
-  REQUIRE(r.contains({5, 6, 4}));
-  REQUIRE(r.contains({8, 9, 7}));
-  REQUIRE(r.size() == 3);
+  REQUIRE(result->attrs() == expected_attrs);
+  REQUIRE(result->contains({2, 3, 1}));
+  REQUIRE(result->contains({5, 6, 4}));
+  REQUIRE(result->contains({8, 9, 7}));
+  REQUIRE(result->size() == 3);
 }

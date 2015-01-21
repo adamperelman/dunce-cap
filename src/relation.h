@@ -17,10 +17,12 @@ public:
   Relation* LeftSemiJoin(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
   Relation* CartesianProduct(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
 
+  Relation* SortedByAttributes();
+
   int size() const;
   bool contains(const std::vector<int>& tuple) const;
   const std::vector<std::string>& attrs();
-  
+
 private:
   std::vector<std::string> attrs_;
   std::string relation_name_;

@@ -1,4 +1,5 @@
 #include "relation.h"
+#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <map>
@@ -61,7 +62,7 @@ Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>&
     auto it = find(attrs.begin(), attrs.end(), attrs_[i]);
     if (it != attrs.end()) {
       tuple_index_to_val[i] = tuple[it - attrs.begin()];
-    } 
+    }
   }
 
   Relation* result = new Relation(attrs_);
@@ -82,7 +83,7 @@ Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>&
 
 
 Relation* Relation::CartesianProduct(const vector<int>& tuple, const vector<string>& attrs) const {
-  vector<string> concat_attrs(attrs_); 
+  vector<string> concat_attrs(attrs_);
   concat_attrs.insert(concat_attrs.end(), attrs.begin(), attrs.end());
   Relation* result = new Relation(concat_attrs);
 
@@ -90,6 +91,32 @@ Relation* Relation::CartesianProduct(const vector<int>& tuple, const vector<stri
     t.insert(t.end(), tuple.begin(), tuple.end());
     result->AddTuple(t);
   }
+  return result;
+}
+
+Relation* Relation::SortedByAttributes() {
+  // Sort the attributes together with their original indexes
+  // so we can later sort each tuple in the same order.
+  vector<pair<string, int>> attrs_with_indexes;
+  for (int i = 0; i < attrs_.size(); i++) {
+    attrs_with_indexes.push_back(make_pair(attrs_[i], i));
+  }
+  sort(attrs_with_indexes.begin(), attrs_with_indexes.end());
+
+  vector<string> attrs_copy(attrs_);
+  sort(attrs_copy.begin(), attrs_copy.end());
+  Relation* result = new Relation(attrs_copy);
+
+  for (set<vector<int>>::iterator it = tuples_.begin(); it != tuples_.end(); ++it) {
+    vector<int> tuple;
+    for (int i = 0; i < it->size(); i++) {
+      int index = attrs_with_indexes[i].second;
+      tuple.push_back(it->at(index));
+    }
+
+    result->AddTuple(tuple);
+  }
+
   return result;
 }
 
