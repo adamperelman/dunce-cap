@@ -80,6 +80,19 @@ Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>&
   return result;
 }
 
+
+Relation* Relation::CartesianProduct(const vector<int>& tuple, const vector<string>& attrs) const {
+  vector<string> concat_attrs(attrs_); 
+  concat_attrs.insert(concat_attrs.end(), attrs.begin(), attrs.end());
+  Relation* result = new Relation(concat_attrs);
+
+  for (vector<int> t : tuples_) {
+    t.insert(t.end(), tuple.begin(), tuple.end());
+    result->AddTuple(t);
+  }
+  return result;
+}
+
 const vector<string>& Relation::attrs() {
   return attrs_;
 }
@@ -88,6 +101,6 @@ int Relation::size() const {
   return tuples_.size();
 }
 
-bool Relation::contains(const std::vector<int>& tuple) const {
+bool Relation::contains(const vector<int>& tuple) const {
   return tuples_.find(tuple) != tuples_.end();
 }
