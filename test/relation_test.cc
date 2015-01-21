@@ -32,3 +32,17 @@ TEST_CASE("Left semijoin with a single tuple") {
   vector<string> expected_attrs({"a", "b"});
   REQUIRE(result->attrs() == expected_attrs);
 }
+
+TEST_CASE("Cartersian product with a single tuple") {
+  Relation r("data/simple.txt", "simple", {"a", "b"});
+  vector<int> tuple = {8, 0};
+  vector<string> attrs = {"c", "d"};
+  Relation* result = r.CartesianProduct(tuple, attrs);
+  REQUIRE(result->size() == 4);
+  REQUIRE(result->contains({1, 3, 8, 0}));
+  REQUIRE(result->contains({1, 4, 8, 0}));
+  REQUIRE(result->contains({2, 3, 8, 0}));
+  REQUIRE(result->contains({2, 4, 8, 0}));
+  vector<string> expected_attrs({"a", "b", "c", "d"});
+  REQUIRE(result->attrs() == expected_attrs);
+}
