@@ -12,7 +12,7 @@ generic_join_test: generic_join_test.o relation.o generic_join.o
 relation_test.o: test/relation_test.cc
 	$(CC) $(CFLAGS) -c test/relation_test.cc
 
-generic_join_test.o: test/relation_test.cc
+generic_join_test.o: test/generic_join_test.cc
 	$(CC) $(CFLAGS) -c test/generic_join_test.cc
 
 main: main.o relation.o

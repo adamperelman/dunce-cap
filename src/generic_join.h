@@ -5,6 +5,6 @@
 
 #include "relation.h"
 
-Relation* GenericJoin(std::vector<Relation> relations);
+Relation* GenericJoin(const std::vector<Relation>& relations);
 
 #endif
