@@ -43,7 +43,9 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
   for (const vector<int>& t : L->tuples()) {
     Relation* result_per_tuple = GenericJoinInternal(ProjectOverlapping(J, relations, t, L->attrs()));
     Relation* product = result_per_tuple->CartesianProduct(t, L->attrs());
-    partial_results.push_back(product);
+    if (product->size()) {
+      partial_results.push_back(product);
+    }
   }
 
   return Relation::Union(partial_results);
