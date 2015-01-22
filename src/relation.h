@@ -25,6 +25,7 @@ public:
   int size() const;
   bool contains(const std::vector<int>& tuple) const;
   const std::vector<std::string>& attrs() const;
+  std::string name() const { return relation_name_; }
 
 private:
   std::vector<std::string> attrs_;

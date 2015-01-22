@@ -2,11 +2,28 @@
 
 using namespace std;
 
-void Database::AddRelation(Relation relation) {
+Relation* GenericJoinInternal(const vector<Relation>& relations) {
+  set<string> attrs;
+  for (const Relation& r : relations) {
+    attrs.insert(r.attrs().begin(), r.attrs().end());
+  }
 
-}
+  if (attrs.size() == 1) {
+    return Relation::Intersect(relations);
+  }
 
-Relation* Database::GenericJoin(vector<string> names) {
   return NULL;
 }
 
+void Database::AddRelation(Relation relation) {
+  tables_.emplace(relation.name(), relation);
+}
+
+Relation* Database::GenericJoin(const vector<string>& names) {
+  vector<Relation> relations;
+  for (const string& name : names) {
+    relations.push_back(tables_.at(name));
+  }
+
+  return GenericJoinInternal(relations);
+}

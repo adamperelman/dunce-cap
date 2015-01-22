@@ -2,17 +2,17 @@
 #include "catch.h"
 
 #include "../src/relation.h"
-#include "../src/generic_join.h"
+#include "../src/database.h"
 
 using namespace std;
 
 TEST_CASE("Single attribute case works correctly") {
-  vector<Relation> relations;
-  relations.push_back(Relation("data/single1.txt", "R", {"a"}));
-  relations.push_back(Relation("data/single2.txt", "S", {"a"}));
-  relations.push_back(Relation("data/single2.txt", "T", {"a"}));
+  Database db;
+  db.AddRelation(Relation("data/single1.txt", "R", {"a"}));
+  db.AddRelation(Relation("data/single2.txt", "S", {"a"}));
+  db.AddRelation(Relation("data/single3.txt", "T", {"a"}));
 
-  Relation* result = GenericJoin(relations);
+  Relation* result = db.GenericJoin({"R", "S", "T"});
 
   REQUIRE(result->size() == 2);
   REQUIRE(result->contains({1}));

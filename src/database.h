@@ -10,9 +10,9 @@ public:
   ~Database() {}
 
   void AddRelation(Relation relation);
-  Relation* GenericJoin(std::vector<std::string> names);
-   
+  Relation* GenericJoin(const std::vector<std::string>& names);
+
 private:
-  std::map<std::string, Relation> tables;   
+  std::map<std::string, Relation> tables_;
 };
 #endif /* __DATABASE_H__ */
