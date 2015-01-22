@@ -8,9 +8,9 @@ using namespace std;
 
 TEST_CASE("Single attribute case works correctly") {
   Database db;
-  db.AddRelation(Relation("data/single1.txt", "R", {"a"}));
-  db.AddRelation(Relation("data/single2.txt", "S", {"a"}));
-  db.AddRelation(Relation("data/single3.txt", "T", {"a"}));
+  db.AddRelation(new Relation("data/single1.txt", "R", {"a"}));
+  db.AddRelation(new Relation("data/single2.txt", "S", {"a"}));
+  db.AddRelation(new Relation("data/single3.txt", "T", {"a"}));
 
   Relation* result = db.GenericJoin({"R", "S", "T"});
 
@@ -19,20 +19,20 @@ TEST_CASE("Single attribute case works correctly") {
   REQUIRE(result->contains({3}));
 }
 
-// TEST_CASE("Triangle query works correctly") {
-//   vector<Relation> relations;
-//   relations.push_back(Relation("data/triangle.txt", "R", {"a", "b"}));
-//   relations.push_back(Relation("data/triangle.txt", "S", {"a", "b"}));
-//   relations.push_back(Relation("data/triangle.txt", "T", {"a", "b"}));
+TEST_CASE("Triangle query works correctly") {
+  Database db;
+  db.AddRelation(new Relation("data/triangle.txt", "R", {"a", "b"}));
+  db.AddRelation(new Relation("data/triangle.txt", "S", {"b", "c"}));
+  db.AddRelation(new Relation("data/triangle.txt", "T", {"c", "a"}));
 
-//   // TODO: fix memory leak
-//   Relation* result = GenericJoin(relations);
-//   REQUIRE(result->size() == 3);
+  // TODO: fix memory leak
+  Relation* result = db.GenericJoin({"R", "S", "T"});
+  REQUIRE(result->size() == 3);
 
-//   Relation* sorted = result->SortedByAttributes();
-//   vector<string> expected_attrs({"a", "b", "c"});
-//   REQUIRE(sorted->attrs() == expected_attrs);
-//   REQUIRE(sorted->contains({1, 2, 3}));
-//   REQUIRE(sorted->contains({2, 3, 1}));
-//   REQUIRE(sorted->contains({3, 1, 2}));
-// }
+  Relation* sorted = result->SortedByAttributes();
+  vector<string> expected_attrs({"a", "b", "c"});
+  REQUIRE(sorted->attrs() == expected_attrs);
+  REQUIRE(sorted->contains({1, 2, 3}));
+  REQUIRE(sorted->contains({2, 3, 1}));
+  REQUIRE(sorted->contains({3, 1, 2}));
+}

@@ -35,21 +35,21 @@ void Relation::AddTuple(vector<int> tuple) {
   tuples_.insert(tuple);
 }
 
-Relation* Relation::Intersect(const vector<Relation>& relations) {
-  for (const Relation& relation : relations) {
-    assert(relation.attrs().size() == 1);
+Relation* Relation::Intersect(const vector<Relation*>& relations) {
+  for (const Relation* relation : relations) {
+    assert(relation->attrs().size() == 1);
   }
 
-  set<vector<int>> intersection(relations.at(0).tuples_);
+  set<vector<int>> intersection(relations.at(0)->tuples_);
   for (int i = 1; i < relations.size(); i++) {
     set<vector<int>> temp;
     set_intersection(intersection.begin(), intersection.end(),
-                     relations[i].tuples_.begin(), relations[i].tuples_.end(),
+                     relations[i]->tuples_.begin(), relations[i]->tuples_.end(),
                      inserter(temp, temp.begin()));
     intersection = temp;
   }
 
-  return new Relation(relations[0].attrs(), intersection);
+  return new Relation(relations[0]->attrs(), intersection);
 }
 
 Relation* Relation::Project(const set<string>& attrs) const {
@@ -113,6 +113,15 @@ Relation* Relation::CartesianProduct(const vector<int>& tuple, const vector<stri
     result->AddTuple(t);
   }
   return result;
+}
+
+bool Relation::ContainsAttributes(const set<string>& attrs) const {
+  for (const string& at : attrs_) {
+    if (attrs.count(at)) {
+      return true;
+    } 
+  }
+  return false;
 }
 
 Relation* Relation::SortedByAttributes() {

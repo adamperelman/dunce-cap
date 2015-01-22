@@ -48,10 +48,10 @@ TEST_CASE("Cartersian product with a single tuple") {
 }
 
 TEST_CASE("Intersection of three single-attribute relations") {
-  vector<Relation> relations;
-  relations.push_back(Relation("data/single1.txt", "R", {"a"}));
-  relations.push_back(Relation("data/single2.txt", "S", {"a"}));
-  relations.push_back(Relation("data/single3.txt", "T", {"a"}));
+  vector<Relation*> relations;
+  relations.push_back(new Relation("data/single1.txt", "R", {"a"}));
+  relations.push_back(new Relation("data/single2.txt", "S", {"a"}));
+  relations.push_back(new Relation("data/single3.txt", "T", {"a"}));
 
   Relation* result = Relation::Intersect(relations);
 

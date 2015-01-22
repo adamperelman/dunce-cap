@@ -13,12 +13,13 @@ public:
   Relation(std::vector<std::string> attrs, std::set<std::vector<int>> tuples);
   ~Relation() {}
 
-  static Relation* Intersect(const std::vector<Relation>& relations);
+  static Relation* Intersect(const std::vector<Relation*>& relations);
 
   void AddTuple(std::vector<int> tuple);
   Relation* Project(const std::set<std::string>& attrs) const;
   Relation* LeftSemiJoin(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
   Relation* CartesianProduct(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
+  bool ContainsAttributes(const std::set<std::string>& attrs) const;
 
   Relation* SortedByAttributes();
 
@@ -26,6 +27,7 @@ public:
   bool contains(const std::vector<int>& tuple) const;
   const std::vector<std::string>& attrs() const;
   std::string name() const { return relation_name_; }
+  const std::set<std::vector<int>>& tuples() const { return tuples_; }
 
 private:
   std::vector<std::string> attrs_;
