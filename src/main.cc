@@ -1,7 +1,9 @@
 #include "relation.h"
 #include <iostream>
 
+using namespace std;
+
 int main() {
-  Relation r("simple.txt", "simple", {"a", "b"});
-  std::cout << "size: " << r.size() << std::endl;
+  Relation r("data/simple.txt", "simple", {"a", "b"});
+  cout << r;
 }

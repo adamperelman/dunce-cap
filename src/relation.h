@@ -1,6 +1,7 @@
 #ifndef __RELATION_H__
 #define __RELATION_H__
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <set>
@@ -35,4 +36,7 @@ private:
   std::string relation_name_;
   std::set<std::vector<int>> tuples_;
 };
+
+std::ostream& operator<<(std::ostream& os, const Relation& rel);
+
 #endif /* __DATABASE_H__ */

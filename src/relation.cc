@@ -180,3 +180,19 @@ int Relation::size() const {
 bool Relation::contains(const vector<int>& tuple) const {
   return tuples_.find(tuple) != tuples_.end();
 }
+
+ostream& operator<<(ostream& os, const Relation& rel) {
+  for (const string& attr : rel.attrs()) {
+    cout << attr << "\t";
+  }
+  cout << endl;
+
+  for (const vector<int>& t : rel.tuples()) {
+    for (int i : t) {
+      cout << i << "\t";
+    }
+    cout << endl;
+  }
+
+  return os;
+}
