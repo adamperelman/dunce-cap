@@ -60,6 +60,19 @@ TEST_CASE("Intersection of three single-attribute relations") {
   REQUIRE(result->contains({3}));
 }
 
+TEST_CASE("Union of three single-attribute relations") {
+  vector<Relation*> relations;
+  relations.push_back(new Relation("data/single1.txt", "R", {"a"}));
+  relations.push_back(new Relation("data/single2.txt", "S", {"a"}));
+  relations.push_back(new Relation("data/single3.txt", "T", {"a"}));
+
+  Relation* result = Relation::Union(relations);
+
+  REQUIRE(result->size() == 9);
+  REQUIRE(result->contains({1}));
+  REQUIRE(result->contains({81}));
+}
+
 TEST_CASE("Sort attrs in relation in dictionary order") {
   Relation r("data/triples.txt", "simple", {"c", "a", "b"});
   Relation* result = r.SortedByAttributes();

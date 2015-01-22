@@ -35,6 +35,25 @@ void Relation::AddTuple(vector<int> tuple) {
   tuples_.insert(tuple);
 }
 
+Relation* Relation::Union(const vector<Relation*>& relations) {
+  if (relations.empty()) {
+    // TODO: is this the right behavior?
+    // Should we give the relation some attributes??
+    return new Relation({});
+  }
+
+  Relation* result = new Relation(relations[0]->attrs());
+
+  for (const Relation* relation : relations) {
+    assert(relation->attrs() == relations[0]->attrs());
+    for (const vector<int>& t : relation->tuples()) {
+      result->AddTuple(t);
+    }
+  }
+
+  return result;
+}
+
 Relation* Relation::Intersect(const vector<Relation*>& relations) {
   for (const Relation* relation : relations) {
     assert(relation->attrs().size() == 1);
@@ -119,7 +138,7 @@ bool Relation::ContainsAttributes(const set<string>& attrs) const {
   for (const string& at : attrs_) {
     if (attrs.count(at)) {
       return true;
-    } 
+    }
   }
   return false;
 }

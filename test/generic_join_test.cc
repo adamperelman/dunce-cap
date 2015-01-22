@@ -8,6 +8,7 @@ using namespace std;
 
 TEST_CASE("Single attribute case works correctly") {
   Database db;
+
   db.AddRelation(new Relation("data/single1.txt", "R", {"a"}));
   db.AddRelation(new Relation("data/single2.txt", "S", {"a"}));
   db.AddRelation(new Relation("data/single3.txt", "T", {"a"}));
