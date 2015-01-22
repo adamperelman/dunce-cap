@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS  = -g -Wall -std=c++0x
+CFLAGS  = -g -Wall -std=c++0x -O3
 
 default: main
 
@@ -15,8 +15,8 @@ relation_test.o: test/relation_test.cc
 generic_join_test.o: test/generic_join_test.cc
 	$(CC) $(CFLAGS) -c test/generic_join_test.cc
 
-main: main.o relation.o
-	$(CC) $(CFLAGS) main.o relation.o -o main.exe
+main: main.o relation.o database.o
+	$(CC) $(CFLAGS) main.o relation.o database.o -o main.exe
 
 main.o: src/main.cc
 	$(CC) $(CFLAGS) -c src/main.cc
