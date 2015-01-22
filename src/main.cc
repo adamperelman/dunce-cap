@@ -8,9 +8,9 @@ using namespace std;
 
 int main() {
   Database db;
-  db.AddRelation(new Relation("data/facebook_combined.txt", "R", {"a", "b"}));
-  db.AddRelation(new Relation("data/facebook_combined.txt", "S", {"b", "c"}));
-  db.AddRelation(new Relation("data/facebook_combined.txt", "T", {"c", "a"}));
+  db.AddRelation(new Relation("data/facebook_short.txt", "R", {"a", "b"}));
+  db.AddRelation(new Relation("data/facebook_short.txt", "S", {"b", "c"}));
+  db.AddRelation(new Relation("data/facebook_short.txt", "T", {"c", "a"}));
 
   Relation* result = db.GenericJoin({"R", "S", "T"});
 

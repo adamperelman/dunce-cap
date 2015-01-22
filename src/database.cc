@@ -26,10 +26,10 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
     attrs.insert(r->attrs().begin(), r->attrs().end());
   }
 
-  for (string a : attrs) {
-    cout << a;
-  }
-  cout << endl;
+  // for (string a : attrs) {
+  //  cout << a;
+  // }
+  // cout << endl;
 
   if (attrs.size() == 1) {
     return Relation::Intersect(relations);

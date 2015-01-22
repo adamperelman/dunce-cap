@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cassert>
 #include <map>
+#include <algorithm>
 
 using namespace std;
 
