@@ -1,5 +1,5 @@
-CC = g++
-CFLAGS  = -g -Wall -std=c++0x -O3
+CC = clang++
+CFLAGS  = -g -Wall -std=c++0x -pg
 
 default: main
 

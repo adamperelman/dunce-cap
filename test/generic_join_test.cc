@@ -37,3 +37,23 @@ TEST_CASE("Triangle query works correctly") {
   REQUIRE(sorted->contains({2, 3, 1}));
   REQUIRE(sorted->contains({3, 1, 2}));
 }
+
+TEST_CASE("4 cliques query works correctly") {
+  Database db;
+  db.AddRelation(new Relation("data/four_cliques.txt", "R", {"a", "b"}));
+  db.AddRelation(new Relation("data/four_cliques.txt", "S", {"b", "c"}));
+  db.AddRelation(new Relation("data/four_cliques.txt", "T", {"c", "a"}));
+  db.AddRelation(new Relation("data/four_cliques.txt", "U", {"a", "d"}));
+  db.AddRelation(new Relation("data/four_cliques.txt", "V", {"b", "d"}));
+  db.AddRelation(new Relation("data/four_cliques.txt", "W", {"c", "d"}));
+
+  // TODO: fix memory leak
+  Relation* result = db.GenericJoin({"R", "S", "T", "U", "V", "W"});
+  // there should be 24 ways to count this one 4-clique
+  REQUIRE(result->size() == 24);
+
+  Relation* sorted = result->SortedByAttributes();
+  vector<string> expected_attrs({"a", "b", "c", "d"});
+  REQUIRE(sorted->attrs() == expected_attrs);
+}
+
