@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS  = -g -Wall -std=c++0x -pg
+CFLAGS  = -g -Wall -std=c++0x
 
 default: main
 

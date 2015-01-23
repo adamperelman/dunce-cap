@@ -52,11 +52,20 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
   ++it;
   set<string> J(it, attrs.end());
 
-  unique_ptr<Relation> L(GenericJoinInternal(ProjectOverlapping(I, relations)));
+  vector<Relation*> projections = ProjectOverlapping(I, relations);
+  unique_ptr<Relation> L(GenericJoinInternal(projections));
+  for (Relation* rel : projections) {
+    delete rel;
+  }
+
 
   vector<unique_ptr<Relation>> partial_results;
   for (const vector<int>& t : L->tuples()) {
-    unique_ptr<Relation> result_per_tuple(GenericJoinInternal(SemiJoinThenProjectOverlapping(J, relations, t, L->attrs())));
+    vector<Relation*> semi_joined_projections = SemiJoinThenProjectOverlapping(J, relations, t, L->attrs());
+    unique_ptr<Relation> result_per_tuple(GenericJoinInternal(semi_joined_projections));
+    for (Relation* rel : semi_joined_projections) {
+      delete rel;
+    }
     unique_ptr<Relation> product(result_per_tuple->CartesianProduct(t, L->attrs()));
     if (product->size()) {
       partial_results.push_back(move(product));
