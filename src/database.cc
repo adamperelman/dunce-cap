@@ -5,16 +5,26 @@ using namespace std;
 
 vector<Relation*> ProjectOverlapping(
   const set<string>& attributes,
-  const vector<Relation*>& relations,
-  const vector<int>& tuple_to_semijoin = vector<int>(),
-  const vector<string>& attrs_to_semijoin = vector<string>()) {
-  vector<Relation*> results; // TODO: change this stuff to pointers
+  const vector<Relation*>& relations) {
+  vector<Relation*> results;
   for (const Relation* rel : relations) {
     if (rel->ContainsAttributes(attributes)) {
-      if (!tuple_to_semijoin.empty()) {
-        rel = rel->LeftSemiJoin(tuple_to_semijoin, attrs_to_semijoin);
-      }
       results.push_back(rel->Project(attributes));
+    }
+  }
+  return results;
+}
+
+vector<Relation*> SemiJoinThenProjectOverlapping(
+  const set<string>& attributes,
+  const vector<Relation*>& relations,
+  const vector<int>& tuple_to_semijoin,
+  const vector<string>& attrs_to_semijoin) {
+  vector<Relation*> results;
+  for (const Relation* rel : relations) {
+    if (rel->ContainsAttributes(attributes)) {
+      unique_ptr<Relation> joined_rel(rel->LeftSemiJoin(tuple_to_semijoin, attrs_to_semijoin));
+      results.push_back(joined_rel->Project(attributes));
     }
   }
   return results;
@@ -42,14 +52,14 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
   ++it;
   set<string> J(it, attrs.end());
 
-  Relation* L = GenericJoinInternal(ProjectOverlapping(I, relations));
+  unique_ptr<Relation> L(GenericJoinInternal(ProjectOverlapping(I, relations)));
 
-  vector<Relation*> partial_results;
+  vector<unique_ptr<Relation>> partial_results;
   for (const vector<int>& t : L->tuples()) {
-    Relation* result_per_tuple = GenericJoinInternal(ProjectOverlapping(J, relations, t, L->attrs()));
-    Relation* product = result_per_tuple->CartesianProduct(t, L->attrs());
+    unique_ptr<Relation> result_per_tuple(GenericJoinInternal(SemiJoinThenProjectOverlapping(J, relations, t, L->attrs())));
+    unique_ptr<Relation> product(result_per_tuple->CartesianProduct(t, L->attrs()));
     if (product->size()) {
-      partial_results.push_back(product);
+      partial_results.push_back(move(product));
     }
   }
 
@@ -59,13 +69,13 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
 
 
 void Database::AddRelation(Relation* relation) {
-  tables_.emplace(relation->name(), relation);
+  tables_.emplace(relation->name(), unique_ptr<Relation>(relation));
 }
 
 Relation* Database::GenericJoin(const vector<string>& names) {
   vector<Relation*> relations;
   for (const string& name : names) {
-    relations.push_back(tables_.at(name));
+    relations.push_back(tables_.at(name).get());
   }
 
   return GenericJoinInternal(relations);

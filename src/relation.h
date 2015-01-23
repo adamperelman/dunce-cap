@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <memory>
 
 class Relation {
 
@@ -15,7 +16,7 @@ public:
   ~Relation() {}
 
   static Relation* Intersect(const std::vector<Relation*>& relations);
-  static Relation* Union(const std::vector<Relation*>& relations);
+  static Relation* Union(const std::vector<std::unique_ptr<Relation>>& relations);
 
   void AddTuple(std::vector<int> tuple);
   Relation* Project(const std::set<std::string>& attrs) const;

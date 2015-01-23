@@ -5,6 +5,7 @@
 #include <cassert>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -36,7 +37,7 @@ void Relation::AddTuple(vector<int> tuple) {
   tuples_.insert(tuple);
 }
 
-Relation* Relation::Union(const vector<Relation*>& relations) {
+Relation* Relation::Union(const vector<unique_ptr<Relation>>& relations) {
   if (relations.empty()) {
     // TODO: is this the right behavior?
     // Should we give the relation some attributes??
@@ -45,7 +46,7 @@ Relation* Relation::Union(const vector<Relation*>& relations) {
 
   Relation* result = new Relation(relations[0]->attrs());
 
-  for (const Relation* relation : relations) {
+  for (const unique_ptr<Relation>& relation : relations) {
     assert(relation->attrs() == relations[0]->attrs());
     for (const vector<int>& t : relation->tuples()) {
       result->AddTuple(t);

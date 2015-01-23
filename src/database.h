@@ -3,6 +3,7 @@
 
 #include "relation.h"
 #include <map>
+#include <memory>
 
 class Database {
 public:
@@ -13,6 +14,6 @@ public:
   Relation* GenericJoin(const std::vector<std::string>& names);
 
 private:
-  std::map<std::string, Relation*> tables_;
+  std::map<std::string, std::unique_ptr<Relation>> tables_;
 };
 #endif /* __DATABASE_H__ */

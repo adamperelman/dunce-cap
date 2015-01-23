@@ -3,6 +3,7 @@
 
 #include "../src/relation.h"
 #include "../src/database.h"
+#include <memory>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ TEST_CASE("Single attribute case works correctly") {
   db.AddRelation(new Relation("data/single2.txt", "S", {"a"}));
   db.AddRelation(new Relation("data/single3.txt", "T", {"a"}));
 
-  Relation* result = db.GenericJoin({"R", "S", "T"});
+  unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T"}));
 
   REQUIRE(result->size() == 2);
   REQUIRE(result->contains({1}));
@@ -26,11 +27,10 @@ TEST_CASE("Triangle query works correctly") {
   db.AddRelation(new Relation("data/triangle.txt", "S", {"b", "c"}));
   db.AddRelation(new Relation("data/triangle.txt", "T", {"c", "a"}));
 
-  // TODO: fix memory leak
-  Relation* result = db.GenericJoin({"R", "S", "T"});
+  unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T"}));
   REQUIRE(result->size() == 3);
 
-  Relation* sorted = result->SortedByAttributes();
+  unique_ptr<Relation> sorted(result->SortedByAttributes());
   vector<string> expected_attrs({"a", "b", "c"});
   REQUIRE(sorted->attrs() == expected_attrs);
   REQUIRE(sorted->contains({1, 2, 3}));
@@ -47,12 +47,11 @@ TEST_CASE("4 cliques query works correctly") {
   db.AddRelation(new Relation("data/four_cliques.txt", "V", {"b", "d"}));
   db.AddRelation(new Relation("data/four_cliques.txt", "W", {"c", "d"}));
 
-  // TODO: fix memory leak
-  Relation* result = db.GenericJoin({"R", "S", "T", "U", "V", "W"});
+  unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T", "U", "V", "W"}));
   // there should be 24 ways to count this one 4-clique
   REQUIRE(result->size() == 24);
 
-  Relation* sorted = result->SortedByAttributes();
+  unique_ptr<Relation> sorted(result->SortedByAttributes());
   vector<string> expected_attrs({"a", "b", "c", "d"});
   REQUIRE(sorted->attrs() == expected_attrs);
 }
