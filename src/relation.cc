@@ -69,9 +69,7 @@ Relation* Relation::Intersect(const vector<Relation*>& relations) {
   return new Relation(relations[0]->attrs(), intersection);
 }
 
-Relation* Relation::Project(const set<string>& attrs) const {
-  vector<bool> include_column;
-  vector<string> ordered_projected_columns;
+void Relation::PopulateIncludeAndOrderedProjectedCols(const set<string>& attrs, vector<bool>& include_column, vector<string>& ordered_projected_columns) const {
   for (int i = 0; i < attrs_.size(); i++) {
     if (attrs.find(attrs_[i]) != attrs.end()) {
       include_column.push_back(true);
@@ -80,6 +78,12 @@ Relation* Relation::Project(const set<string>& attrs) const {
       include_column.push_back(false);
     }
   }
+}
+
+Relation* Relation::Project(const set<string>& attrs) const {
+  vector<bool> include_column;
+  vector<string> ordered_projected_columns;
+  PopulateIncludeAndOrderedProjectedCols(attrs, include_column, ordered_projected_columns);
 
   Relation* projection = new Relation(ordered_projected_columns);
   for (const vector<int>& t : tuples_) {
@@ -97,14 +101,7 @@ Relation* Relation::Project(const set<string>& attrs) const {
 Relation* Relation::LeftSemiJoinAndProject(const vector<int>& tuple, const vector<string>& attrs, const set<string>& projection_attrs) const {
   vector<bool> include_column;
   vector<string> ordered_projected_columns;
-  for (int i = 0; i < attrs_.size(); i++) {
-    if (projection_attrs.find(attrs_[i]) != projection_attrs.end()) {
-      include_column.push_back(true);
-      ordered_projected_columns.push_back(attrs_[i]);
-    } else {
-      include_column.push_back(false);
-    }
-  }
+  PopulateIncludeAndOrderedProjectedCols(projection_attrs, include_column, ordered_projected_columns);
 
   map<int,int> tuple_index_to_val;
   for (int i = 0; i < attrs_.size(); ++i) {
