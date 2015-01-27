@@ -38,11 +38,7 @@ void Relation::AddTuple(vector<int> tuple) {
 }
 
 Relation* Relation::Union(const vector<unique_ptr<Relation>>& relations) {
-  if (relations.empty()) {
-    // TODO: is this the right behavior?
-    // Should we give the relation some attributes??
-    return new Relation({});
-  }
+  assert(!relations.empty());
 
   Relation* result = new Relation(relations[0]->attrs());
 

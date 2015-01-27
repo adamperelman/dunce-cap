@@ -72,6 +72,13 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
     }
   }
 
+  if (partial_results.empty()) {
+    // We don't have any relations to union, so just return an empty
+    // relation. The order of the attributes should be the reverse
+    // order of the attributes (since that's consistent with how
+    // we order attributes when we perform the Cartesian Product).
+    return new Relation(vector<string>(attrs.rbegin(), attrs.rend()));
+  }
   return Relation::Union(partial_results);
 }
 
