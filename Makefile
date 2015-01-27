@@ -1,12 +1,12 @@
-CC = g++
-CFLAGS  = -g -Wall -std=c++0x -O3
+CC = clang++
+CFLAGS  = -g -Wall -std=c++0x
 
 default: triangle
 
 relation_test: relation_test.o relation.o
 	$(CC) $(CFLAGS) relation_test.o relation.o -o relation_test.exe
 
-test: generic_join_test.o relation.o database.o
+generic_join_test: generic_join_test.o relation.o database.o
 	$(CC) $(CFLAGS) generic_join_test.o relation.o database.o -o generic_join_test.exe
 
 relation_test.o: test/relation_test.cc

@@ -38,7 +38,11 @@ void Relation::AddTuple(vector<int> tuple) {
 }
 
 Relation* Relation::Union(const vector<unique_ptr<Relation>>& relations) {
-  assert(!relations.empty());
+  if (relations.empty()) {
+    // TODO: is this the right behavior?
+    // Should we give the relation some attributes??
+    return new Relation({});
+  }
 
   Relation* result = new Relation(relations[0]->attrs());
 
@@ -54,7 +58,6 @@ Relation* Relation::Union(const vector<unique_ptr<Relation>>& relations) {
 
 Relation* Relation::Intersect(const vector<Relation*>& relations) {
   for (const Relation* relation : relations) {
-    cout << (relation->attrs().size()) << endl;
     assert(relation->attrs().size() == 1);
   }
 
@@ -95,7 +98,7 @@ Relation* Relation::Project(const set<string>& attrs) const {
   return projection;
 }
 
-Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>& attrs) {
+Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>& attrs) const {
   map<int,int> tuple_index_to_val;
   for (int i = 0; i < attrs_.size(); ++i) {
     auto it = find(attrs.begin(), attrs.end(), attrs_[i]);
@@ -104,20 +107,20 @@ Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>&
     }
   }
 
-  for (auto it = tuples_.begin(); it != tuples_.end(); )  {
-    bool deleted = false;
-    for (int i = 0 ; i < it->size(); ++i) {
-      if (tuple_index_to_val.count(i) && tuple_index_to_val[i] != it->at(i)) {
-        it = tuples_.erase(it);
-        deleted = true;
+  Relation* result = new Relation(attrs_);
+  for (const vector<int>& t : tuples_)  {
+    bool insert_tuple = true;
+    for (int i = 0 ; i < t.size(); ++i) {
+      if (tuple_index_to_val.count(i) && tuple_index_to_val[i] != t[i]) {
+        insert_tuple = false;
         break;
       }
     }
-    if (!deleted) {
-      ++it;
+    if (insert_tuple) {
+      result->AddTuple(t);
     }
   }
-  return this;
+  return result;
 }
 
 
