@@ -17,20 +17,20 @@ vector<Relation*> ProjectOverlapping(
 
 vector<Relation*> SemiJoinThenProjectOverlapping(
   const set<string>& attributes,
-  const vector<Relation*>& relations,
+  vector<Relation*>& relations,
   const vector<int>& tuple_to_semijoin,
   const vector<string>& attrs_to_semijoin) {
   vector<Relation*> results;
-  for (const Relation* rel : relations) {
+  for (Relation* rel : relations) {
     if (rel->ContainsAttributes(attributes)) {
-      unique_ptr<Relation> joined_rel(rel->LeftSemiJoin(tuple_to_semijoin, attrs_to_semijoin));
-      results.push_back(joined_rel->Project(attributes));
+      rel->LeftSemiJoin(tuple_to_semijoin, attrs_to_semijoin);
+      results.push_back(rel->Project(attributes));
     }
   }
   return results;
 }
 
-Relation* GenericJoinInternal(const vector<Relation*>& relations) {
+Relation* GenericJoinInternal(vector<Relation*>& relations) {
   set<string> attrs;
   for (const Relation* r : relations) {
     attrs.insert(r->attrs().begin(), r->attrs().end());
@@ -42,6 +42,9 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
   // cout << endl;
 
   if (attrs.size() == 1) {
+    for (auto rel : relations) {
+      cout << *rel << endl;
+    }
     return Relation::Intersect(relations);
   }
 
@@ -72,6 +75,12 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
     }
   }
 
+
+  if (partial_results.empty()) {
+    // reverse order since we always append I
+    vector<string> ordered_attrs(attrs.rbegin(), attrs.rend());
+    return new Relation(ordered_attrs);
+  }
   return Relation::Union(partial_results);
 }
 
@@ -84,8 +93,13 @@ void Database::AddRelation(Relation* relation) {
 Relation* Database::GenericJoin(const vector<string>& names) {
   vector<Relation*> relations;
   for (const string& name : names) {
-    relations.push_back(tables_.at(name).get());
+    Relation* copy(new Relation(*tables_[name]));
+    relations.push_back(copy);
   }
 
-  return GenericJoinInternal(relations);
+  Relation* result = GenericJoinInternal(relations);
+  for (Relation * rel_ptr : relations) {
+    delete(rel_ptr);
+  }
+  return result;
 }
