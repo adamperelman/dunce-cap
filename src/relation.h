@@ -21,6 +21,7 @@ public:
   void AddTuple(std::vector<int> tuple);
   Relation* Project(const std::set<std::string>& attrs) const;
   Relation* LeftSemiJoin(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
+  Relation* LeftSemiJoinAndProject(const std::vector<int>& tuple, const std::vector<std::string>& attrs,const std::set<std::string>& projection_attrs) const;
   Relation* CartesianProduct(const std::vector<int>& tuple, const std::vector<std::string>& attrs) const;
   bool ContainsAttributes(const std::set<std::string>& attrs) const;
 

@@ -94,6 +94,48 @@ Relation* Relation::Project(const set<string>& attrs) const {
   return projection;
 }
 
+Relation* Relation::LeftSemiJoinAndProject(const vector<int>& tuple, const vector<string>& attrs, const set<string>& projection_attrs) const {
+  vector<bool> include_column;
+  vector<string> ordered_projected_columns;
+  for (int i = 0; i < attrs_.size(); i++) {
+    if (projection_attrs.find(attrs_[i]) != projection_attrs.end()) {
+      include_column.push_back(true);
+      ordered_projected_columns.push_back(attrs_[i]);
+    } else {
+      include_column.push_back(false);
+    }
+  }
+
+  map<int,int> tuple_index_to_val;
+  for (int i = 0; i < attrs_.size(); ++i) {
+    auto it = find(attrs.begin(), attrs.end(), attrs_[i]);
+    if (it != attrs.end()) {
+      tuple_index_to_val[i] = tuple[it - attrs.begin()];
+    }
+  }
+
+  Relation* result = new Relation(ordered_projected_columns);
+  for (const vector<int>& t : tuples_)  {
+    bool insert_tuple = true;
+    for (int i = 0 ; i < t.size(); ++i) {
+      if (tuple_index_to_val.count(i) && tuple_index_to_val[i] != t[i]) {
+        insert_tuple = false;
+        break;
+      }
+    }
+    if (insert_tuple) {
+      vector<int> new_tuple;
+      for (int i=0; i < t.size(); ++i) {
+        if (include_column[i]) {
+          new_tuple.push_back(t[i]);
+        }
+      }
+      result->AddTuple(new_tuple);
+    }
+  }
+  return result;
+}
+
 Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>& attrs) const {
   map<int,int> tuple_index_to_val;
   for (int i = 0; i < attrs_.size(); ++i) {

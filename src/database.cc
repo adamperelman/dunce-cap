@@ -23,8 +23,7 @@ vector<Relation*> SemiJoinThenProjectOverlapping(
   vector<Relation*> results;
   for (const Relation* rel : relations) {
     if (rel->ContainsAttributes(attributes)) {
-      unique_ptr<Relation> joined_rel(rel->LeftSemiJoin(tuple_to_semijoin, attrs_to_semijoin));
-      results.push_back(joined_rel->Project(attributes));
+      results.push_back(rel->LeftSemiJoinAndProject(tuple_to_semijoin, attrs_to_semijoin, attributes));
     }
   }
   return results;
