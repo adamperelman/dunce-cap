@@ -38,7 +38,7 @@ private:
   std::string relation_name_;
   std::set<std::vector<int>> tuples_;
 
-  void PopulateIncludeAndOrderedProjectedCols(const std::set<std::string>& attrs, std::vector<bool>& include_column, std::vector<std::string>& ordered_projected_columns) const;
+  void PopulateIncludeAndOrderedProjectedCols(const std::set<std::string>& attrs, std::vector<int>& include_column, std::vector<std::string>& ordered_projected_columns) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Relation& rel);

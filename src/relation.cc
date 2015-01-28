@@ -69,29 +69,25 @@ Relation* Relation::Intersect(const vector<Relation*>& relations) {
   return new Relation(relations[0]->attrs(), intersection);
 }
 
-void Relation::PopulateIncludeAndOrderedProjectedCols(const set<string>& attrs, vector<bool>& include_column, vector<string>& ordered_projected_columns) const {
+void Relation::PopulateIncludeAndOrderedProjectedCols(const set<string>& attrs, vector<int>& include_column, vector<string>& ordered_projected_columns) const {
   for (int i = 0; i < attrs_.size(); i++) {
     if (attrs.find(attrs_[i]) != attrs.end()) {
-      include_column.push_back(true);
+      include_column.push_back(i);
       ordered_projected_columns.push_back(attrs_[i]);
-    } else {
-      include_column.push_back(false);
     }
   }
 }
 
 Relation* Relation::Project(const set<string>& attrs) const {
-  vector<bool> include_column;
+  vector<int> include_column;
   vector<string> ordered_projected_columns;
   PopulateIncludeAndOrderedProjectedCols(attrs, include_column, ordered_projected_columns);
 
   Relation* projection = new Relation(ordered_projected_columns);
   for (const vector<int>& t : tuples_) {
-    vector<int> new_tuple;
-    for (int i = 0; i < t.size(); i++) {
-      if (include_column[i]) {
-        new_tuple.push_back(t[i]);
-      }
+    vector<int> new_tuple(include_column.size());
+    for (int i = 0; i < include_column.size(); i++) {
+      new_tuple[i] = t[include_column[i]];
     }
     projection->AddTuple(new_tuple);
   }
@@ -99,7 +95,7 @@ Relation* Relation::Project(const set<string>& attrs) const {
 }
 
 Relation* Relation::LeftSemiJoinAndProject(const vector<int>& tuple, const vector<string>& attrs, const set<string>& projection_attrs) const {
-  vector<bool> include_column;
+  vector<int> include_column;
   vector<string> ordered_projected_columns;
   PopulateIncludeAndOrderedProjectedCols(projection_attrs, include_column, ordered_projected_columns);
 
@@ -121,11 +117,9 @@ Relation* Relation::LeftSemiJoinAndProject(const vector<int>& tuple, const vecto
       }
     }
     if (insert_tuple) {
-      vector<int> new_tuple;
-      for (int i=0; i < t.size(); ++i) {
-        if (include_column[i]) {
-          new_tuple.push_back(t[i]);
-        }
+      vector<int> new_tuple(include_column.size());
+      for (int i=0; i < include_column.size(); ++i) {
+        new_tuple[i] = t[include_column[i]];
       }
       result->AddTuple(new_tuple);
     }
