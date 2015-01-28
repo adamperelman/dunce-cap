@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <iterator>
 
 using namespace std;
 
@@ -27,10 +28,10 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
   }
 }
 
-Relation::Relation(vector<string> attrs): attrs_(attrs) {
+Relation::Relation(vector<string> attrs, size_t num_tuples_hint): attrs_(attrs), tuples_(num_tuples_hint) {
 }
 
-Relation::Relation(vector<string> attrs, set<vector<int>> tuples): attrs_(attrs), tuples_(tuples) {
+Relation::Relation(vector<string> attrs, tuple_set tuples): attrs_(attrs), tuples_(tuples) {
 }
 
 void Relation::AddTuple(vector<int> tuple) {
@@ -40,7 +41,7 @@ void Relation::AddTuple(vector<int> tuple) {
 Relation* Relation::Union(const vector<unique_ptr<Relation>>& relations) {
   assert(!relations.empty());
 
-  Relation* result = new Relation(relations[0]->attrs());
+  Relation* result = new Relation(relations[0]->attrs(), 0); // TODO
 
   for (const unique_ptr<Relation>& relation : relations) {
     assert(relation->attrs() == relations[0]->attrs());
@@ -52,20 +53,31 @@ Relation* Relation::Union(const vector<unique_ptr<Relation>>& relations) {
   return result;
 }
 
+bool relation_size_cmp(const Relation* const & rel1, const Relation* const & rel2) {
+  return rel1->size() < rel2->size();
+}
+
 Relation* Relation::Intersect(const vector<Relation*>& relations) {
   for (const Relation* relation : relations) {
     assert(relation->attrs().size() == 1);
   }
 
-  set<vector<int>> intersection(relations.at(0)->tuples_);
-  for (int i = 1; i < relations.size(); i++) {
-    set<vector<int>> temp;
-    set_intersection(intersection.begin(), intersection.end(),
-                     relations[i]->tuples_.begin(), relations[i]->tuples_.end(),
-                     inserter(temp, temp.begin()));
-    intersection = temp;
+  auto smallest_relation =  *min_element(begin(relations), end(relations), relation_size_cmp);
+  tuple_set intersection(smallest_relation->size());
+  for (const vector<int>& tuple: smallest_relation->tuples()) {
+    bool insert_tuple = true;
+    for (const Relation* relation : relations) {
+      if (relation != smallest_relation) {
+        if (relation->tuples().count(tuple) == 0) {
+          insert_tuple = false;
+          break;
+        }
+      }
+    }
+    if (insert_tuple) {
+      intersection.insert(tuple);
+    }
   }
-
   return new Relation(relations[0]->attrs(), intersection);
 }
 
@@ -83,7 +95,7 @@ Relation* Relation::Project(const set<string>& attrs) const {
   vector<string> ordered_projected_columns;
   PopulateIncludeAndOrderedProjectedCols(attrs, include_column, ordered_projected_columns);
 
-  Relation* projection = new Relation(ordered_projected_columns);
+  Relation* projection = new Relation(ordered_projected_columns, 0); // TODO
   for (const vector<int>& t : tuples_) {
     vector<int> new_tuple(include_column.size());
     for (int i = 0; i < include_column.size(); i++) {
@@ -107,7 +119,7 @@ Relation* Relation::LeftSemiJoinAndProject(const vector<int>& tuple, const vecto
     }
   }
 
-  Relation* result = new Relation(ordered_projected_columns);
+  Relation* result = new Relation(ordered_projected_columns, 0); // TODO
   for (const vector<int>& t : tuples_)  {
     bool insert_tuple = true;
     for (int i = 0 ; i < t.size(); ++i) {
@@ -136,7 +148,7 @@ Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>&
     }
   }
 
-  Relation* result = new Relation(attrs_);
+  Relation* result = new Relation(attrs_, 0); // TODO
   for (const vector<int>& t : tuples_)  {
     bool insert_tuple = true;
     for (int i = 0 ; i < t.size(); ++i) {
@@ -156,7 +168,7 @@ Relation* Relation::LeftSemiJoin(const vector<int>& tuple, const vector<string>&
 Relation* Relation::CartesianProduct(const vector<int>& tuple, const vector<string>& attrs) const {
   vector<string> concat_attrs(attrs_);
   concat_attrs.insert(concat_attrs.end(), attrs.begin(), attrs.end());
-  Relation* result = new Relation(concat_attrs);
+  Relation* result = new Relation(concat_attrs, 0); // TODO
 
   for (vector<int> t : tuples_) {
     t.insert(t.end(), tuple.begin(), tuple.end());
@@ -185,9 +197,9 @@ Relation* Relation::SortedByAttributes() {
 
   vector<string> attrs_copy(attrs_);
   sort(attrs_copy.begin(), attrs_copy.end());
-  Relation* result = new Relation(attrs_copy);
+  Relation* result = new Relation(attrs_copy, 0); // TODO
 
-  for (set<vector<int>>::iterator it = tuples_.begin(); it != tuples_.end(); ++it) {
+  for (tuple_set::iterator it = tuples_.begin(); it != tuples_.end(); ++it) {
     vector<int> tuple;
     for (int i = 0; i < it->size(); i++) {
       int index = attrs_with_indexes[i].second;

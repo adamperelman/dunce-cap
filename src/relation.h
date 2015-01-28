@@ -4,15 +4,25 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <set>
 #include <memory>
+#include <boost/functional/hash.hpp>
+
+struct tuple_hash {
+  size_t operator()(const std::vector<int>& tuple) const {
+    return boost::hash_range(tuple.begin(), tuple.end());
+  }
+};
+
+typedef std::unordered_set<std::vector<int>, tuple_hash> tuple_set;
 
 class Relation {
 
 public:
   Relation(const std::string& filename, std::string relation_name, std::vector<std::string> attrs);
-  Relation(std::vector<std::string> attrs);
-  Relation(std::vector<std::string> attrs, std::set<std::vector<int>> tuples);
+  Relation(std::vector<std::string> attrs, size_t num_tuples_hint);
+  Relation(std::vector<std::string> attrs, tuple_set tuples);
   ~Relation() {}
 
   static Relation* Intersect(const std::vector<Relation*>& relations);
@@ -31,16 +41,17 @@ public:
   bool contains(const std::vector<int>& tuple) const;
   const std::vector<std::string>& attrs() const;
   std::string name() const { return relation_name_; }
-  const std::set<std::vector<int>>& tuples() const { return tuples_; }
+  const tuple_set& tuples() const { return tuples_; }
 
 private:
   std::vector<std::string> attrs_;
   std::string relation_name_;
-  std::set<std::vector<int>> tuples_;
+  tuple_set tuples_;
+
 
   void PopulateIncludeAndOrderedProjectedCols(const std::set<std::string>& attrs, std::vector<int>& include_column, std::vector<std::string>& ordered_projected_columns) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Relation& rel);
 
-#endif /* __DATABASE_H__ */
+#endif /* __RELATION_H__ */

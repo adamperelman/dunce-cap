@@ -76,7 +76,7 @@ Relation* GenericJoinInternal(const vector<Relation*>& relations) {
     // relation. The order of the attributes should be the reverse
     // order of the attributes (since that's consistent with how
     // we order attributes when we perform the Cartesian Product).
-    return new Relation(vector<string>(attrs.rbegin(), attrs.rend()));
+    return new Relation(vector<string>(attrs.rbegin(), attrs.rend()), 0);
   }
   return Relation::Union(partial_results);
 }
