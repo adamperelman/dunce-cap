@@ -61,10 +61,10 @@ TEST_CASE("Intersection of three single-attribute relations") {
 }
 
 TEST_CASE("Union of three single-attribute relations") {
-  vector<Relation*> relations;
-  relations.push_back(new Relation("data/single1.txt", "R", {"a"}));
-  relations.push_back(new Relation("data/single2.txt", "S", {"a"}));
-  relations.push_back(new Relation("data/single3.txt", "T", {"a"}));
+  vector<unique_ptr<Relation>> relations;
+  relations.push_back(move(unique_ptr<Relation>(new Relation("data/single1.txt", "R", {"a"}))));
+  relations.push_back(move(unique_ptr<Relation>(new Relation("data/single2.txt", "S", {"a"}))));
+  relations.push_back(move(unique_ptr<Relation>(new Relation("data/single3.txt", "T", {"a"}))));
 
   Relation* result = Relation::Union(relations);
 
