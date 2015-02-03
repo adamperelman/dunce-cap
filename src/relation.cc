@@ -104,7 +104,7 @@ void Relation::TrieNode::InsertTuple(const vector<int>& tuple, vector<int>::iter
   auto val_ptr = lower_bound(values_.begin(), values_.end(), *start);
   int index = val_ptr - values_.begin();
 
-  if (*val_ptr != *start) {
+  if (val_ptr == values_.end() || *val_ptr != *start) {
     values_.insert(val_ptr, *start);
 
     if (start+1 != tuple.end()) {
