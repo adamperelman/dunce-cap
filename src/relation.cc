@@ -9,7 +9,7 @@
 
 using namespace std;
 
-Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name) {
+Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name), root_(new TrieNode) {
 
   vector<pair<string, int>> attrs_with_indexes;
   for (int i = 0; i < attrs_.size(); i++) {
@@ -38,7 +38,7 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
     if (ordered_tuple.size() != attrs.size()) {
       throw runtime_error("tuple length does not match attributes length");
     }
-    root_.InsertTuple(ordered_tuple, ordered_tuple.begin());
+    root_->InsertTuple(ordered_tuple, ordered_tuple.begin());
   }
 }
 
@@ -56,15 +56,15 @@ const vector<string>& Relation::attrs() const {
 }
 
 int Relation::size() const {
-  return root_.size();
+  return root_->size();
 }
 
 bool Relation::contains(const vector<int>& tuple) const {
-  return root_.contains(tuple);
+  return root_->contains(tuple);
 }
 
 vector<vector<int>> Relation::MakeTuples() const {
-  return root_.MakeTuples();
+  return root_->MakeTuples();
 }
 
 ostream& operator<<(ostream& os, const Relation& rel) {
@@ -82,7 +82,7 @@ ostream& operator<<(ostream& os, const Relation& rel) {
   return os;
 }
 
-vector<vector<int>> Relation::TrieNode::MakeTuples() const {
+vector<vector<int>> TrieNode::MakeTuples() const {
   vector<vector<int>> tuples;
 
   for (int i = 0; i < values_.size(); i++) {
@@ -101,7 +101,7 @@ vector<vector<int>> Relation::TrieNode::MakeTuples() const {
   return tuples;
 }
 
-int Relation::TrieNode::size() const {
+int TrieNode::size() const {
   int result = 0;
   for (int i = 0; i < values_.size(); i++) {
     const unique_ptr<TrieNode>& child_ptr = children_[i];
@@ -114,7 +114,7 @@ int Relation::TrieNode::size() const {
   return result;
 }
 
-void Relation::TrieNode::InsertTuple(const vector<int>& tuple, vector<int>::iterator start) {
+void TrieNode::InsertTuple(const vector<int>& tuple, vector<int>::iterator start) {
   auto val_ptr = lower_bound(values_.begin(), values_.end(), *start);
   int index = val_ptr - values_.begin();
 
@@ -134,7 +134,7 @@ void Relation::TrieNode::InsertTuple(const vector<int>& tuple, vector<int>::iter
   }
 }
 
-bool Relation::TrieNode::contains(const vector<int>& tuple) const {
+bool TrieNode::contains(const vector<int>& tuple) const {
   if (tuple.empty()) {
     throw runtime_error("tuple passed to contains() is too short");
   }

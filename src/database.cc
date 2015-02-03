@@ -1,97 +1,33 @@
 #include "database.h"
+#include <unordered_map>
 #include <iostream>
 
 using namespace std;
 
-vector<Relation*> ProjectOverlapping(
-  const set<string>& attributes,
-  const vector<Relation*>& relations) {
-  vector<Relation*> results;
-  for (const Relation* rel : relations) {
-    if (rel->ContainsAttributes(attributes)) {
-      results.push_back(rel->Project(attributes));
-    }
-  }
-  return results;
+
+TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
+                              vector<string> free_attrs,
+                              unordered_map<string, int> bound_attrs) {
+  return NULL;
 }
-
-vector<Relation*> SemiJoinThenProjectOverlapping(
-  const set<string>& attributes,
-  const vector<Relation*>& relations,
-  const vector<int>& tuple_to_semijoin,
-  const vector<string>& attrs_to_semijoin) {
-  vector<Relation*> results;
-  for (const Relation* rel : relations) {
-    if (rel->ContainsAttributes(attributes)) {
-      results.push_back(rel->LeftSemiJoinAndProject(tuple_to_semijoin, attrs_to_semijoin, attributes));
-    }
-  }
-  return results;
-}
-
-Relation* GenericJoinInternal(const vector<Relation*>& relations) {
-  set<string> attrs;
-  for (const Relation* r : relations) {
-    attrs.insert(r->attrs().begin(), r->attrs().end());
-  }
-
-  // for (string a : attrs) {
-  //  cout << a;
-  // }
-  // cout << endl;
-
-  if (attrs.size() == 1) {
-    return Relation::Intersect(relations);
-  }
-
-  /* Pick I to be {first attribute}, J = V \ I */
-  auto it = attrs.begin();
-  set<string> I;
-  I.insert(*it);
-  ++it;
-  set<string> J(it, attrs.end());
-
-  vector<Relation*> projections = ProjectOverlapping(I, relations);
-  unique_ptr<Relation> L(GenericJoinInternal(projections));
-  for (Relation* rel : projections) {
-    delete rel;
-  }
-
-
-  vector<unique_ptr<Relation>> partial_results;
-  for (const vector<int>& t : L->tuples()) {
-    vector<Relation*> semi_joined_projections = SemiJoinThenProjectOverlapping(J, relations, t, L->attrs());
-    unique_ptr<Relation> result_per_tuple(GenericJoinInternal(semi_joined_projections));
-    for (Relation* rel : semi_joined_projections) {
-      delete rel;
-    }
-    unique_ptr<Relation> product(result_per_tuple->CartesianProduct(t, L->attrs()));
-    if (product->size()) {
-      partial_results.push_back(move(product));
-    }
-  }
-
-  if (partial_results.empty()) {
-    // We don't have any relations to union, so just return an empty
-    // relation. The order of the attributes should be the reverse
-    // order of the attributes (since that's consistent with how
-    // we order attributes when we perform the Cartesian Product).
-    return new Relation(vector<string>(attrs.rbegin(), attrs.rend()));
-  }
-  return Relation::Union(partial_results);
-}
-
-
 
 void Database::AddRelation(Relation* relation) {
   tables_.emplace(relation->name(), unique_ptr<Relation>(relation));
 }
 
-Relation* Database::GenericJoin(const vector<string>& names) {
-  vector<Relation*> relations;
+Relation* Database::GenericJoin(const vector<string>& names) const {
+  vector<Relation*> rels_to_join;
+
+  set<string> attrs;
   for (const string& name : names) {
-    relations.push_back(tables_.at(name).get());
+    Relation* r = tables_.at(name).get();
+    rels_to_join.push_back(r);
+    attrs.insert(r->attrs().begin(), r->attrs().end());
   }
 
-  return GenericJoinInternal(relations);
+  vector<string> ordered_attrs(attrs.begin(), attrs.end());
+  unordered_map<string, int> bound_attrs; // Nothing is bound yet.
+
+  TrieNode* root = GenericJoinInternal(rels_to_join, ordered_attrs, bound_attrs);
+  return new Relation(ordered_attrs, root);
 }
