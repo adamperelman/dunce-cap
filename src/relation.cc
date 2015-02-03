@@ -9,7 +9,7 @@
 
 using namespace std;
 
-Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name), root_(new TrieNode) {
+Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name), root_(new TrieNode()) {
 
   vector<pair<string, int>> attrs_with_indexes;
   for (int i = 0; i < attrs_.size(); i++) {
@@ -17,6 +17,7 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
   }
   sort(attrs_with_indexes.begin(), attrs_with_indexes.end());
   sort(attrs_.begin(), attrs_.end());
+  root_->set_attr(attrs_[0]);
 
   ifstream ifs(filename);
 
@@ -38,7 +39,7 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
     if (ordered_tuple.size() != attrs.size()) {
       throw runtime_error("tuple length does not match attributes length");
     }
-    root_->InsertTuple(ordered_tuple, ordered_tuple.begin());
+    root_->InsertTuple(ordered_tuple.begin(), ordered_tuple.end(), attrs_.begin(), attrs_.end());
   }
 }
 
@@ -46,7 +47,7 @@ bool Relation::ContainsAttribute(const string& attr) const {
   return binary_search(attrs_.begin(), attrs_.end(), attr);
 }
 
-const vector<int>& Relation::MatchingValues(const string& attr,
+const vector<int>* Relation::MatchingValues(const string& attr,
                                             const unordered_map<string, int>& bound_attrs) const {
   return root_->MatchingValues(attr, bound_attrs);
 }
@@ -114,32 +115,46 @@ int TrieNode::size() const {
   return result;
 }
 
-const vector<int>& TrieNode::MatchingValues(const string& attr,
+const vector<int>* TrieNode::MatchingValues(const string& attr,
                                             const unordered_map<string, int>& bound_attrs) const {
-  // TODO: implement checking for bound_attrs
-  // TODO: implement getting the right attribute (not just the first attribute, which is what this does!!)
-  // In order to do this, we'll probably have to change trienode
-  // so that it keeps track of what attribute it represents.
-  return values_;
+  if (attr == attr_) {
+    return &values_;
+  }
+
+  assert(bound_attrs.count(attr_));
+
+  auto val_ptr = lower_bound(values_.begin(), values_.end(), bound_attrs.at(attr_));
+  if (val_ptr == values_.end() || *val_ptr != bound_attrs.at(attr_)) {
+    return nullptr;
+  }
+
+  int index = val_ptr - values_.begin();
+  return children_[index]->MatchingValues(attr, bound_attrs);
 }
 
-void TrieNode::InsertTuple(const vector<int>& tuple, vector<int>::iterator start) {
-  auto val_ptr = lower_bound(values_.begin(), values_.end(), *start);
+void TrieNode::InsertTuple(vector<int>::iterator tuple_start,
+                           vector<int>::iterator tuple_end,
+                           vector<string>::iterator attr_start,
+                           vector<string>::iterator attr_end) {
+  assert(tuple_end - tuple_start == attr_end - attr_start);
+  assert(attr_ == *attr_start);
+
+  auto val_ptr = lower_bound(values_.begin(), values_.end(), *tuple_start);
   int index = val_ptr - values_.begin();
 
-  if (val_ptr == values_.end() || *val_ptr != *start) {
-    values_.insert(val_ptr, *start);
+  if (val_ptr == values_.end() || *val_ptr != *tuple_start) {
+    values_.insert(val_ptr, *tuple_start);
 
-    if (start+1 != tuple.end()) {
+    if (tuple_start+1 != tuple_end) {
       children_.insert(children_.begin()+index,
-                       unique_ptr<TrieNode>(new TrieNode()));
+                       unique_ptr<TrieNode>(new TrieNode(*(attr_start+1))));
     } else {
       children_.insert(children_.begin()+index, unique_ptr<TrieNode>(nullptr));
     }
   }
 
-  if (start+1 != tuple.end()) {
-    children_[index]->InsertTuple(tuple, start+1);
+  if (tuple_start+1 != tuple_end) {
+    children_[index]->InsertTuple(tuple_start+1, tuple_end, attr_start+1, attr_end);
   }
 }
 
@@ -171,10 +186,8 @@ bool TrieNode::contains(const vector<int>& tuple) const {
 
 
 void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
-  assert(value > values_.back());
+  assert(values_.empty() || value > values_.back());
   values_.push_back(value);
   children_.push_back(unique_ptr<TrieNode>(child_ptr));
   assert(values_.size() == children_.size());
 }
-
-

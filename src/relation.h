@@ -10,23 +10,28 @@
 
 class TrieNode {
 public:
-  TrieNode() {}
-  TrieNode(const std::vector<int>& values) : values_(values), children_(values.size()) {
-  }
+  TrieNode() {};
+  TrieNode(const std::string& attr) : attr_(attr) {}
+  TrieNode(const std::string& attr, const std::vector<int>& values) : attr_(attr), values_(values), children_(values.size()) {}
 
-  void InsertTuple(const std::vector<int>& tuple, std::vector<int>::iterator start);
+  void InsertTuple(std::vector<int>::iterator tuple_start,
+                   std::vector<int>::iterator tuple_end,
+                   std::vector<std::string>::iterator attr_start,
+                   std::vector<std::string>::iterator attr_end);
   std::vector<std::vector<int>> MakeTuples() const;
 
   int size() const; // TODO change this to cache size in each trienode
   bool contains(const std::vector<int>& tuple) const;
-  const std::vector<int>& MatchingValues(const std::string& attr,
+  const std::vector<int>* MatchingValues(const std::string& attr,
                                          const std::unordered_map<std::string, int>& bound_attrs) const;
 
   const std::vector<int>& values() const { return values_; }
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
+  void set_attr(const std::string& attr) { attr_ = attr; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
 private:
+  std::string attr_;
   std::vector<int> values_;
   std::vector<std::unique_ptr<TrieNode>> children_;
 };
@@ -38,7 +43,7 @@ public:
   Relation(std::vector<std::string> attrs, TrieNode* root) : attrs_(attrs), root_(root) {}
   ~Relation() {}
 
-  const std::vector<int>& MatchingValues(const std::string& attr,
+  const std::vector<int>* MatchingValues(const std::string& attr,
                                          const std::unordered_map<std::string, int>& bound_attrs) const;
 
   bool ContainsAttribute(const std::string& attr) const;

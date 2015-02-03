@@ -38,15 +38,18 @@ TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
     vector<const vector<int>*> matching_relations;
     for (const Relation* rel : relations) {
       if (rel->ContainsAttribute(*free_attrs_begin)) {
-        matching_relations.push_back(&rel->MatchingValues(*free_attrs_begin, bound_attrs));
+        const vector<int>* vals = rel->MatchingValues(*free_attrs_begin, bound_attrs);
+        if (vals) {
+          matching_relations.push_back(vals);
+        }
       }
     }
-    return new TrieNode(Intersection(matching_relations));
+    return new TrieNode(*free_attrs_begin, Intersection(matching_relations));
   }
 
   /* Pick I to be {first attribute}, J = V \ I */
   TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1, bound_attrs);
-  TrieNode* result = new TrieNode();
+  TrieNode* result = new TrieNode(*free_attrs_begin);
   for (int val : L->values()) {
     bound_attrs[*free_attrs_begin] = val;
     TrieNode* righthand_vals = GenericJoinInternal(relations, free_attrs_begin + 1, free_attrs_end, bound_attrs);

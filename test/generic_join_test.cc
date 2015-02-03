@@ -21,7 +21,7 @@ TEST_CASE("Single attribute case works correctly") {
   REQUIRE(result->contains({3}));
 }
 
-/*
+
 TEST_CASE("Triangle query works correctly") {
   Database db;
   db.AddRelation(new Relation("data/triangle.txt", "R", {"a", "b"}));
@@ -53,4 +53,3 @@ TEST_CASE("4 cliques query works correctly") {
   vector<string> expected_attrs({"a", "b", "c", "d"});
   REQUIRE(result->attrs() == expected_attrs);
 }
-*/
