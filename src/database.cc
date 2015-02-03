@@ -28,12 +28,15 @@ vector<int> Intersection(const vector<const vector<int>*>& ordered_sets) {
 }
 
 
+// TODO: should we be passing a reference to free_attrs and bound_attrs
+// instead of making copies?
 TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
                               vector<string> free_attrs,
                               unordered_map<string, int> bound_attrs) {
   if (free_attrs.size() == 1) {
     vector<const vector<int>*> matching_relations;
     for (const Relation* rel : relations) {
+      // TODO: only use this relation if it contains a relevant attribute
       matching_relations.push_back(&rel->MatchingValues(free_attrs[0], bound_attrs));
     }
     return new TrieNode(Intersection(matching_relations));
