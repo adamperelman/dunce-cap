@@ -42,13 +42,8 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
   }
 }
 
-bool Relation::ContainsAttributes(const set<string>& attrs) const {
-  for (const string& at : attrs_) {
-    if (attrs.count(at)) {
-      return true;
-    }
-  }
-  return false;
+bool Relation::ContainsAttribute(const string& attr) const {
+  return binary_search(attrs_.begin(), attrs_.end(), attr);
 }
 
 const vector<int>& Relation::MatchingValues(const string& attr,

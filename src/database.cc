@@ -37,7 +37,9 @@ TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
     vector<const vector<int>*> matching_relations;
     for (const Relation* rel : relations) {
       // TODO: only use this relation if it contains a relevant attribute
-      matching_relations.push_back(&rel->MatchingValues(free_attrs[0], bound_attrs));
+      if (rel->ContainsAttribute(free_attrs[0])) {
+        matching_relations.push_back(&rel->MatchingValues(free_attrs[0], bound_attrs));
+      }
     }
     return new TrieNode(Intersection(matching_relations));
   }

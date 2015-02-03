@@ -34,13 +34,13 @@ class Relation {
 
 public:
   Relation(const std::string& filename, std::string relation_name, std::vector<std::string> attrs);
- Relation(std::vector<std::string> attrs, TrieNode* root) : attrs_(attrs), root_(root) {}
+  Relation(std::vector<std::string> attrs, TrieNode* root) : attrs_(attrs), root_(root) {}
   ~Relation() {}
 
   const std::vector<int>& MatchingValues(const std::string& attr,
                                          const std::unordered_map<std::string, int>& bound_attrs) const;
 
-  bool ContainsAttributes(const std::set<std::string>& attrs) const;
+  bool ContainsAttribute(const std::string& attr) const;
 
   // Slow!! Only for testing / printing.
   std::vector<std::vector<int>> MakeTuples() const;
