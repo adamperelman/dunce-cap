@@ -168,3 +168,13 @@ bool TrieNode::contains(const vector<int>& tuple) const {
 
   throw runtime_error("tuple passed to contains() is too long");
 }
+
+
+void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
+  assert(value > values_.back());
+  values_.push_back(value);
+  children_.push_back(unique_ptr<TrieNode>(child_ptr));
+  assert(values_.size() == children_.size());
+}
+
+

@@ -31,21 +31,31 @@ vector<int> Intersection(const vector<const vector<int>*>& ordered_sets) {
 // TODO: should we be passing a reference to free_attrs and bound_attrs
 // instead of making copies?
 TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
-                              vector<string> free_attrs,
+                              vector<string>::iterator free_attrs_begin,
+                              vector<string>::iterator free_attrs_end,
                               unordered_map<string, int> bound_attrs) {
-  if (free_attrs.size() == 1) {
+  if (free_attrs_begin + 1 == free_attrs_end) {
     vector<const vector<int>*> matching_relations;
     for (const Relation* rel : relations) {
-      // TODO: only use this relation if it contains a relevant attribute
-      if (rel->ContainsAttribute(free_attrs[0])) {
-        matching_relations.push_back(&rel->MatchingValues(free_attrs[0], bound_attrs));
+      if (rel->ContainsAttribute(*free_attrs_begin)) {
+        matching_relations.push_back(&rel->MatchingValues(*free_attrs_begin, bound_attrs));
       }
     }
     return new TrieNode(Intersection(matching_relations));
   }
 
-  // TODO
-  return NULL;
+  /* Pick I to be {first attribute}, J = V \ I */
+  TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1, bound_attrs);
+  TrieNode* result = new TrieNode();
+  for (int val : L->values()) {
+    bound_attrs[*free_attrs_begin] = val;
+    TrieNode* righthand_vals = GenericJoinInternal(relations, free_attrs_begin + 1, free_attrs_end, bound_attrs);
+    if (righthand_vals->size() > 0) {
+      result->AddChildNode(val, righthand_vals); // this does the cartesian product
+    }
+  }
+
+  return result;
 }
 
 void Database::AddRelation(Relation* relation) {
@@ -65,6 +75,6 @@ Relation* Database::GenericJoin(const vector<string>& names) const {
   vector<string> ordered_attrs(attrs.begin(), attrs.end());
   unordered_map<string, int> bound_attrs; // Nothing is bound yet.
 
-  TrieNode* root = GenericJoinInternal(rels_to_join, ordered_attrs, bound_attrs);
+  TrieNode* root = GenericJoinInternal(rels_to_join, ordered_attrs.begin(), ordered_attrs.end(), bound_attrs);
   return new Relation(ordered_attrs, root);
 }
