@@ -11,6 +11,13 @@ using namespace std;
 
 Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name) {
 
+  vector<pair<string, int>> attrs_with_indexes;
+  for (int i = 0; i < attrs_.size(); i++) {
+    attrs_with_indexes.push_back(make_pair(attrs_[i], i));
+  }
+  sort(attrs_with_indexes.begin(), attrs_with_indexes.end());
+  sort(attrs_.begin(), attrs_.end());
+
   ifstream ifs(filename);
 
   string line;
@@ -21,10 +28,17 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
     while (iss >> temp) {
       tuple.push_back(temp);
     }
-    if (tuple.size() != attrs.size()) {
+
+    vector<int> ordered_tuple;
+    for (int i = 0; i < tuple.size(); i++) {
+      int index = attrs_with_indexes[i].second;
+      ordered_tuple.push_back(tuple[index]);
+    }
+
+    if (ordered_tuple.size() != attrs.size()) {
       throw runtime_error("tuple length does not match attributes length");
     }
-    root_.InsertTuple(tuple, tuple.begin());
+    root_.InsertTuple(ordered_tuple, ordered_tuple.begin());
   }
 }
 

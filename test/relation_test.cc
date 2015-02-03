@@ -16,12 +16,12 @@ TEST_CASE("Relations are created correctly") {
 }
 
 TEST_CASE("Make sure we can create a relation with 3 attrs") {
-  Relation r("data/triples.txt", "triples", {"a", "b", "c"});
+  Relation r("data/triples.txt", "triples", {"c", "a", "b"});
   REQUIRE(r.size() == 3);
-  REQUIRE(r.contains({1, 2, 3}));
-  REQUIRE(r.contains({4, 5, 6}));
-  REQUIRE(r.contains({7, 8, 9}));
-  REQUIRE(!r.contains({1, 2, 6}));
+  REQUIRE(r.contains({2, 3, 1}));
+  REQUIRE(r.contains({5, 6, 4}));
+  REQUIRE(r.contains({8, 9, 7}));
+  REQUIRE(!r.contains({1, 2, 3}));
   vector<string> expected_attrs({"a", "b", "c"});
   REQUIRE(r.attrs() == expected_attrs);
 }
