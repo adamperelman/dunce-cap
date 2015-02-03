@@ -6,14 +6,21 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <unordered_map>
 
 class TrieNode {
 public:
+  TrieNode() {}
+  TrieNode(const std::vector<int>& values) : values_(values), children_(values.size()) {
+  }
+
   void InsertTuple(const std::vector<int>& tuple, std::vector<int>::iterator start);
   std::vector<std::vector<int>> MakeTuples() const;
 
   int size() const;
   bool contains(const std::vector<int>& tuple) const;
+  const std::vector<int>& MatchingValues(const std::string& attr,
+                                         const std::unordered_map<std::string, int>& bound_attrs) const;
 
   const std::vector<int>& values() const { return values_; }
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
@@ -29,6 +36,9 @@ public:
   Relation(const std::string& filename, std::string relation_name, std::vector<std::string> attrs);
  Relation(std::vector<std::string> attrs, TrieNode* root) : attrs_(attrs), root_(root) {}
   ~Relation() {}
+
+  const std::vector<int>& MatchingValues(const std::string& attr,
+                                         const std::unordered_map<std::string, int>& bound_attrs) const;
 
   bool ContainsAttributes(const std::set<std::string>& attrs) const;
 

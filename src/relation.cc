@@ -51,6 +51,11 @@ bool Relation::ContainsAttributes(const set<string>& attrs) const {
   return false;
 }
 
+const vector<int>& Relation::MatchingValues(const string& attr,
+                                            const unordered_map<string, int>& bound_attrs) const {
+  return root_->MatchingValues(attr, bound_attrs);
+}
+
 const vector<string>& Relation::attrs() const {
   return attrs_;
 }
@@ -112,6 +117,15 @@ int TrieNode::size() const {
     }
   }
   return result;
+}
+
+const vector<int>& TrieNode::MatchingValues(const string& attr,
+                                            const unordered_map<string, int>& bound_attrs) const {
+  // TODO: implement checking for bound_attrs
+  // TODO: implement getting the right attribute (not just the first attribute, which is what this does!!)
+  // In order to do this, we'll probably have to change trienode
+  // so that it keeps track of what attribute it represents.
+  return values_;
 }
 
 void TrieNode::InsertTuple(const vector<int>& tuple, vector<int>::iterator start) {
