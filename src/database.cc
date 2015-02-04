@@ -81,3 +81,14 @@ Relation* Database::GenericJoin(const vector<string>& names) const {
   TrieNode* root = GenericJoinInternal(rels_to_join, ordered_attrs.begin(), ordered_attrs.end(), bound_attrs);
   return new Relation(ordered_attrs, root);
 }
+
+ostream& operator<<(ostream& os, const Database& db) {
+  for (auto rel_it = db.tables_.begin();
+       rel_it != db.tables_.end();
+       ++rel_it) {
+    cout << rel_it->first << endl;
+    cout << *(rel_it->second) << endl << endl;
+  }
+
+  return os;
+}

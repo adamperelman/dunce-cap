@@ -18,7 +18,11 @@ int main(int argc, char* argv[]) {
   db.AddRelation(new Relation(argv[1], "S", {"b", "c"}));
   db.AddRelation(new Relation(argv[1], "T", {"c", "a"}));
 
+  cout << "loaded database: " << endl;
+  cout << db << endl;
+
   Relation* result = db.GenericJoin({"R", "S", "T"});
 
+  // cout << (*result) << endl;
   cout << "size: " << result->size() << endl;
 }

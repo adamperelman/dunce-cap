@@ -15,5 +15,7 @@ public:
 
 private:
   std::map<std::string, std::unique_ptr<Relation>> tables_;
+
+  friend std::ostream& operator<<(std::ostream& os, const Database& db);
 };
 #endif /* __DATABASE_H__ */

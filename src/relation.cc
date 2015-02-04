@@ -73,6 +73,8 @@ ostream& operator<<(ostream& os, const Relation& rel) {
     cout << attr << "\t";
   }
 
+  cout << endl;
+
   for (const vector<int>& tuple : rel.MakeTuples()) {
     for (int val : tuple) {
       cout << val << "\t";
