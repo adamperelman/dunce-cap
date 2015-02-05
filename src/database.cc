@@ -1,97 +1,95 @@
 #include "database.h"
+#include <algorithm>
+#include <unordered_map>
 #include <iostream>
 
 using namespace std;
 
-vector<Relation*> ProjectOverlapping(
-  const set<string>& attributes,
-  const vector<Relation*>& relations) {
-  vector<Relation*> results;
-  for (const Relation* rel : relations) {
-    if (rel->ContainsAttributes(attributes)) {
-      results.push_back(rel->Project(attributes));
+// TODO: replace with better algorithm (e.g. EmptyHeaded)
+vector<int> Intersection(const vector<const vector<int>*>& ordered_sets) {
+  vector<int> result;
+  for (int val : *(ordered_sets[0])) {
+    bool is_in_intersection = true;
+    for (auto set_it = ordered_sets.begin()+1;
+         set_it < ordered_sets.end();
+         ++set_it) {
+      if (!binary_search((*set_it)->begin(),
+                         (*set_it)->end(),
+                         val)) {
+        is_in_intersection = false;
+        break;
+      }
+    }
+    if (is_in_intersection) {
+      result.push_back(val);
     }
   }
-  return results;
+  return result;
 }
 
-vector<Relation*> SemiJoinThenProjectOverlapping(
-  const set<string>& attributes,
-  const vector<Relation*>& relations,
-  const vector<int>& tuple_to_semijoin,
-  const vector<string>& attrs_to_semijoin) {
-  vector<Relation*> results;
-  for (const Relation* rel : relations) {
-    if (rel->ContainsAttributes(attributes)) {
-      results.push_back(rel->LeftSemiJoinAndProject(tuple_to_semijoin, attrs_to_semijoin, attributes));
+
+// TODO: should we be passing a reference to free_attrs and bound_attrs
+// instead of making copies?
+TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
+                              vector<string>::iterator free_attrs_begin,
+                              vector<string>::iterator free_attrs_end,
+                              unordered_map<string, int> bound_attrs) {
+  if (free_attrs_begin + 1 == free_attrs_end) {
+    vector<const vector<int>*> matching_relations;
+    for (const Relation* rel : relations) {
+      if (rel->ContainsAttribute(*free_attrs_begin)) {
+        const vector<int>* vals = rel->MatchingValues(*free_attrs_begin, bound_attrs);
+        if (vals) {
+          matching_relations.push_back(vals);
+        }
+      }
     }
-  }
-  return results;
-}
-
-Relation* GenericJoinInternal(const vector<Relation*>& relations) {
-  set<string> attrs;
-  for (const Relation* r : relations) {
-    attrs.insert(r->attrs().begin(), r->attrs().end());
-  }
-
-  // for (string a : attrs) {
-  //  cout << a;
-  // }
-  // cout << endl;
-
-  if (attrs.size() == 1) {
-    return Relation::Intersect(relations);
+    return new TrieNode(*free_attrs_begin, Intersection(matching_relations));
   }
 
   /* Pick I to be {first attribute}, J = V \ I */
-  auto it = attrs.begin();
-  set<string> I;
-  I.insert(*it);
-  ++it;
-  set<string> J(it, attrs.end());
-
-  vector<Relation*> projections = ProjectOverlapping(I, relations);
-  unique_ptr<Relation> L(GenericJoinInternal(projections));
-  for (Relation* rel : projections) {
-    delete rel;
-  }
-
-
-  vector<unique_ptr<Relation>> partial_results;
-  for (const vector<int>& t : L->tuples()) {
-    vector<Relation*> semi_joined_projections = SemiJoinThenProjectOverlapping(J, relations, t, L->attrs());
-    unique_ptr<Relation> result_per_tuple(GenericJoinInternal(semi_joined_projections));
-    for (Relation* rel : semi_joined_projections) {
-      delete rel;
-    }
-    unique_ptr<Relation> product(result_per_tuple->CartesianProduct(t, L->attrs()));
-    if (product->size()) {
-      partial_results.push_back(move(product));
+  TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1, bound_attrs);
+  TrieNode* result = new TrieNode(*free_attrs_begin);
+  for (int val : L->values()) {
+    bound_attrs[*free_attrs_begin] = val;
+    TrieNode* righthand_vals = GenericJoinInternal(relations, free_attrs_begin + 1, free_attrs_end, bound_attrs);
+    if (righthand_vals->size() > 0) {
+      result->AddChildNode(val, righthand_vals); // this does the cartesian product
     }
   }
 
-  if (partial_results.empty()) {
-    // We don't have any relations to union, so just return an empty
-    // relation. The order of the attributes should be the reverse
-    // order of the attributes (since that's consistent with how
-    // we order attributes when we perform the Cartesian Product).
-    return new Relation(vector<string>(attrs.rbegin(), attrs.rend()));
-  }
-  return Relation::Union(partial_results);
+  delete L;
+  return result;
 }
-
-
 
 void Database::AddRelation(Relation* relation) {
   tables_.emplace(relation->name(), unique_ptr<Relation>(relation));
 }
 
-Relation* Database::GenericJoin(const vector<string>& names) {
-  vector<Relation*> relations;
+Relation* Database::GenericJoin(const vector<string>& names) const {
+  vector<Relation*> rels_to_join;
+
+  set<string> attrs;
   for (const string& name : names) {
-    relations.push_back(tables_.at(name).get());
+    Relation* r = tables_.at(name).get();
+    rels_to_join.push_back(r);
+    attrs.insert(r->attrs().begin(), r->attrs().end());
   }
 
-  return GenericJoinInternal(relations);
+  vector<string> ordered_attrs(attrs.begin(), attrs.end());
+  unordered_map<string, int> bound_attrs; // Nothing is bound yet.
+
+  TrieNode* root = GenericJoinInternal(rels_to_join, ordered_attrs.begin(), ordered_attrs.end(), bound_attrs);
+  return new Relation(ordered_attrs, root);
+}
+
+ostream& operator<<(ostream& os, const Database& db) {
+  for (auto rel_it = db.tables_.begin();
+       rel_it != db.tables_.end();
+       ++rel_it) {
+    cout << rel_it->first << endl;
+    cout << *(rel_it->second) << endl << endl;
+  }
+
+  return os;
 }

@@ -21,6 +21,7 @@ TEST_CASE("Single attribute case works correctly") {
   REQUIRE(result->contains({3}));
 }
 
+
 TEST_CASE("Triangle query works correctly") {
   Database db;
   db.AddRelation(new Relation("data/triangle.txt", "R", {"a", "b"}));
@@ -29,13 +30,11 @@ TEST_CASE("Triangle query works correctly") {
 
   unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T"}));
   REQUIRE(result->size() == 3);
-
-  unique_ptr<Relation> sorted(result->SortedByAttributes());
   vector<string> expected_attrs({"a", "b", "c"});
-  REQUIRE(sorted->attrs() == expected_attrs);
-  REQUIRE(sorted->contains({1, 2, 3}));
-  REQUIRE(sorted->contains({2, 3, 1}));
-  REQUIRE(sorted->contains({3, 1, 2}));
+  REQUIRE(result->attrs() == expected_attrs);
+  REQUIRE(result->contains({1, 2, 3}));
+  REQUIRE(result->contains({2, 3, 1}));
+  REQUIRE(result->contains({3, 1, 2}));
 }
 
 TEST_CASE("4 cliques query works correctly") {
@@ -51,8 +50,6 @@ TEST_CASE("4 cliques query works correctly") {
   // there should be 24 ways to count this one 4-clique
   REQUIRE(result->size() == 24);
 
-  unique_ptr<Relation> sorted(result->SortedByAttributes());
   vector<string> expected_attrs({"a", "b", "c", "d"});
-  REQUIRE(sorted->attrs() == expected_attrs);
+  REQUIRE(result->attrs() == expected_attrs);
 }
-
