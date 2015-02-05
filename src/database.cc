@@ -58,6 +58,7 @@ TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
     }
   }
 
+  delete L;
   return result;
 }
 

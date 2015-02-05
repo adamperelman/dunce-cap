@@ -32,4 +32,6 @@ int main(int argc, char* argv[]) {
   cout << join_time.count() << "ms\n" << endl;
 //  cout << (*result) << endl;
   cout << "size: " << result->size() << endl;
+
+  delete result;
 }
