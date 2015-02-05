@@ -29,3 +29,4 @@
 *test$
 
 GENERATED*
+callgrind.out.*
