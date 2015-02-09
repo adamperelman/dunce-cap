@@ -5,26 +5,24 @@
 
 using namespace std;
 
+bool vectorLengthCmp(const vector<int>* a, const vector<int>* b) {
+  return a->size() < b->size();
+}
+
 // TODO: replace with better algorithm (e.g. EmptyHeaded)
-vector<int> Intersection(const vector<const vector<int>*>& ordered_sets) {
-  vector<int> result;
-  for (int val : *(ordered_sets[0])) {
-    bool is_in_intersection = true;
-    for (auto set_it = ordered_sets.begin()+1;
-         set_it < ordered_sets.end();
-         ++set_it) {
-      if (!binary_search((*set_it)->begin(),
-                         (*set_it)->end(),
-                         val)) {
-        is_in_intersection = false;
-        break;
-      }
-    }
-    if (is_in_intersection) {
-      result.push_back(val);
-    }
+vector<int> Intersection(vector<const vector<int>*>& ordered_sets) {
+  sort(ordered_sets.begin(), ordered_sets.end(), vectorLengthCmp);
+  vector<int> intersection(*(ordered_sets.at(0)));
+  for (int i = 1; i < ordered_sets.size(); i++) {
+    vector<int> temp;
+    temp.reserve(intersection.size());
+    set_intersection(intersection.begin(), intersection.end(),
+                     ordered_sets.at(i)->begin(), ordered_sets.at(i)->end(),
+                     inserter(temp, temp.begin()));
+    intersection = temp;
   }
-  return result;
+
+  return intersection;
 }
 
 
