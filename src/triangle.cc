@@ -30,6 +30,32 @@ void CheckAllTriangles(const Relation* relation) {
   }
 }
 
+void CheckForDuplicates(const Relation* result) {
+  vector<vector<int>> tuples = result->MakeTuples();
+  cout << "done making tuples" << endl;
+  sort(tuples.begin(), tuples.end());
+  const vector<int>* prev = nullptr;
+  for (const vector<int>& t : tuples) {
+    if (prev && (*prev) == t) {
+      cout << "found duplicate: ";
+      for (int v : t) cout << v;
+      cout << endl;
+    }
+    prev = &t;
+  }
+}
+
+void CheckForLength(const Relation* result) {
+  vector<vector<int>> tuples = result->MakeTuples();
+  cout << "done making tuples" << endl;
+  for (const vector<int>& t : tuples) {
+    if (t.size() != 3) {
+      for (int v : t) cout << v;
+      cout << endl;
+    }
+  }
+}
+
 int main(int argc, char* argv[]) {
   if (argc != 2) {
     cout << "Usage: ./triangle.exe <filename>" << endl;
@@ -60,6 +86,5 @@ int main(int argc, char* argv[]) {
   cout << join_time.count() << "ms\n" << endl;
   cout << "size: " << result->size() << endl;
 
-  CheckAllTriangles(result);
   delete result;
 }
