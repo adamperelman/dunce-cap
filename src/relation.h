@@ -7,6 +7,14 @@
 #include <set>
 #include <memory>
 #include <unordered_map>
+/*
+class RelationIter {
+  public:
+    RelationIter(const Relation& relation) relation_(relation) {}
+  private:
+    const Relation& relation_;
+
+} */
 
 class TrieNode {
 public:
@@ -64,4 +72,4 @@ private:
   friend std::ostream& operator<<(std::ostream& os, const Relation& rel);
 };
 
-#endif /* __DATABASE_H__ */
+#endif /* __RELATION_H__ */

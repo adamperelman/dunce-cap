@@ -4,8 +4,31 @@
 
 #include "relation.h"
 #include "database.h"
+#include <algorithm>
 
 using namespace std;
+
+void CheckAllTriangles(const Relation* relation) {
+  for (const vector<int>& tuple : relation->MakeTuples()) {
+    vector<int> copy(tuple);
+    sort(copy.begin(), copy.end());
+    do {
+      if (!relation->contains(copy)) {
+        cout << "Missing tuple: ";
+        for (int val : copy) {
+          cout << val;
+        }
+        cout << endl;
+        cout << "Original tuple was: ";
+        for (int val : tuple) {
+          cout << val;
+        }
+        cout << endl;
+        cout << endl;
+      }
+    } while (next_permutation(copy.begin(), copy.end()));
+  }
+}
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
@@ -37,5 +60,6 @@ int main(int argc, char* argv[]) {
   cout << join_time.count() << "ms\n" << endl;
   cout << "size: " << result->size() << endl;
 
+  CheckAllTriangles(result);
   delete result;
 }
