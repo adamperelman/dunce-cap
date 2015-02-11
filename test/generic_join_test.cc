@@ -10,11 +10,11 @@ using namespace std;
 TEST_CASE("Single attribute case works correctly") {
   Database db;
 
-  db.AddRelation(new Relation("data/single1.txt", "R", {"a"}));
-  db.AddRelation(new Relation("data/single2.txt", "S", {"a"}));
-  db.AddRelation(new Relation("data/single3.txt", "T", {"a"}));
+  db.AddRelation("R", TrieNode::FromFile("data/single1.txt", {"a"}));
+  db.AddRelation("S", TrieNode::FromFile("data/single2.txt", {"a"}));
+  db.AddRelation("T", TrieNode::FromFile("data/single3.txt", {"a"}));
 
-  unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T"}));
+  unique_ptr<TrieNode> result(db.GenericJoin({"R", "S", "T"}));
 
   REQUIRE(result->size() == 2);
   REQUIRE(result->contains({1}));
@@ -24,11 +24,11 @@ TEST_CASE("Single attribute case works correctly") {
 
 TEST_CASE("Triangle query works correctly") {
   Database db;
-  db.AddRelation(new Relation("data/triangle.txt", "R", {"a", "b"}));
-  db.AddRelation(new Relation("data/triangle.txt", "S", {"b", "c"}));
-  db.AddRelation(new Relation("data/triangle.txt", "T", {"c", "a"}));
+  db.AddRelation("R", TrieNode::FromFile("data/triangle.txt", {"a", "b"}));
+  db.AddRelation("S", TrieNode::FromFile("data/triangle.txt", {"b", "c"}));
+  db.AddRelation("T", TrieNode::FromFile("data/triangle.txt", {"c", "a"}));
 
-  unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T"}));
+  unique_ptr<TrieNode> result(db.GenericJoin({"R", "S", "T"}));
   REQUIRE(result->size() == 3);
   vector<string> expected_attrs({"a", "b", "c"});
   REQUIRE(result->attrs() == expected_attrs);
@@ -39,14 +39,14 @@ TEST_CASE("Triangle query works correctly") {
 
 TEST_CASE("4 cliques query works correctly") {
   Database db;
-  db.AddRelation(new Relation("data/four_cliques.txt", "R", {"a", "b"}));
-  db.AddRelation(new Relation("data/four_cliques.txt", "S", {"b", "c"}));
-  db.AddRelation(new Relation("data/four_cliques.txt", "T", {"c", "a"}));
-  db.AddRelation(new Relation("data/four_cliques.txt", "U", {"a", "d"}));
-  db.AddRelation(new Relation("data/four_cliques.txt", "V", {"b", "d"}));
-  db.AddRelation(new Relation("data/four_cliques.txt", "W", {"c", "d"}));
+  db.AddRelation("R", TrieNode::FromFile("data/four_cliques.txt", {"a", "b"}));
+  db.AddRelation("S", TrieNode::FromFile("data/four_cliques.txt", {"b", "c"}));
+  db.AddRelation("T", TrieNode::FromFile("data/four_cliques.txt", {"c", "a"}));
+  db.AddRelation("U", TrieNode::FromFile("data/four_cliques.txt", {"a", "d"}));
+  db.AddRelation("V", TrieNode::FromFile("data/four_cliques.txt", {"b", "d"}));
+  db.AddRelation("W", TrieNode::FromFile("data/four_cliques.txt", {"c", "d"}));
 
-  unique_ptr<Relation> result(db.GenericJoin({"R", "S", "T", "U", "V", "W"}));
+  unique_ptr<TrieNode> result(db.GenericJoin({"R", "S", "T", "U", "V", "W"}));
   // there should be 24 ways to count this one 4-clique
   REQUIRE(result->size() == 24);
 
