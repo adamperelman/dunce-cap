@@ -116,21 +116,21 @@ int TrieNode::size() const {
   return result;
 }
 
-const vector<int>* TrieNode::MatchingValues(const string& attr,
-                                            const unordered_map<string, int>& bound_attrs) const {
-  if (attr == attr_) {
-    return values_.get();
+const TrieNode* TrieNode::MatchingNode(const std::string& attr, int val) const {
+  if (attr != attr_) {
+    // We're not binding our node's attribute yet, so all our values match.
+    return this;
   }
 
-  assert(bound_attrs.count(attr_));
-
-  auto val_ptr = lower_bound(values_->begin(), values_->end(), bound_attrs.at(attr_));
-  if (val_ptr == values_->end() || *val_ptr != bound_attrs.at(attr_)) {
+  // We're binding this node's attribute now, so we only want a subset of our values.
+  auto val_ptr = lower_bound(values_->begin(), values_->end(), val);
+  if (val_ptr == values_->end() || *val_ptr != val) {
+    // We don't have a matching value.
     return nullptr;
   }
 
   int index = val_ptr - values_->begin();
-  return children_[index]->MatchingValues(attr, bound_attrs);
+  return children_[index].get();
 }
 
 void TrieNode::InsertTuple(vector<int>::iterator tuple_start,

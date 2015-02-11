@@ -27,10 +27,13 @@ public:
 
   int size() const; // TODO change this to cache size in each trienode
   bool contains(const std::vector<int>& tuple) const;
-  const std::vector<int>* MatchingValues(const std::string& attr,
-                                         const std::unordered_map<std::string, int>& bound_attrs) const;
+
+  // attr: the attribute to bind to a value
+  // val: the value it should get bound to
+  const TrieNode* MatchingNode(const std::string& attr, int val) const;
 
   const std::vector<int>* values() const { return values_.get(); }
+  const std::string& attr() const { return attr_; }
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
