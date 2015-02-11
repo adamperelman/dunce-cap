@@ -28,5 +28,10 @@
 *.app
 *test$
 
+# Generated data files.
 GENERATED*
+
+# Callgrind output files (and annotations).
 callgrind.out.*
+annotated_*
+*.dSYM
