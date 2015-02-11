@@ -49,7 +49,7 @@ TrieNode* GenericJoinInternal(const vector<TrieNode*>& relations,
   /* Pick I to be {first attribute}, J = V \ I */
   TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1, bound_attrs);
   TrieNode* result = new TrieNode(*free_attrs_begin);
-  for (int val : L->values()) {
+  for (int val : *L->values()) {
     bound_attrs[*free_attrs_begin] = val;
     TrieNode* righthand_vals = GenericJoinInternal(relations, free_attrs_begin + 1, free_attrs_end, bound_attrs);
     if (righthand_vals->size() > 0) {

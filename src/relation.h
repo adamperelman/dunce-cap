@@ -30,7 +30,7 @@ public:
   const std::vector<int>* MatchingValues(const std::string& attr,
                                          const std::unordered_map<std::string, int>& bound_attrs) const;
 
-  const std::vector<int>& values() const { return *values_; }
+  const std::vector<int>* values() const { return values_.get(); }
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
