@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void CheckAllTriangles(const Relation* relation) {
+void CheckAllTriangles(const TrieNode* relation) {
   for (const vector<int>& tuple : relation->MakeTuples()) {
     vector<int> copy(tuple);
     sort(copy.begin(), copy.end());
@@ -30,7 +30,7 @@ void CheckAllTriangles(const Relation* relation) {
   }
 }
 
-void CheckForDuplicates(const Relation* result) {
+void CheckForDuplicates(const TrieNode* result) {
   vector<vector<int>> tuples = result->MakeTuples();
   cout << "done making tuples" << endl;
   sort(tuples.begin(), tuples.end());
@@ -45,7 +45,7 @@ void CheckForDuplicates(const Relation* result) {
   }
 }
 
-void CheckForLength(const Relation* result) {
+void CheckForLength(const TrieNode* result) {
   vector<vector<int>> tuples = result->MakeTuples();
   cout << "done making tuples" << endl;
   for (const vector<int>& t : tuples) {
@@ -66,9 +66,9 @@ int main(int argc, char* argv[]) {
   Database db;
 
   cout << "loading database..." << endl;
-  db.AddRelation(new Relation(argv[1], "R", {"a", "b"}));
-  db.AddRelation(new Relation(argv[1], "S", {"b", "c"}));
-  db.AddRelation(new Relation(argv[1], "T", {"c", "a"}));
+  db.AddRelation("R", TrieNode::FromFile(argv[1], {"a", "b"}));
+  db.AddRelation("S", TrieNode::FromFile(argv[1], {"b", "c"}));
+  db.AddRelation("T", TrieNode::FromFile(argv[1], {"c", "a"}));
 
   cout << "loaded database" << endl;
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
   typedef chrono::milliseconds ms;
 
   Clock::time_point start_join = Clock::now();
-  Relation* result = db.GenericJoin({"R", "S", "T"});
+  TrieNode* result = db.GenericJoin({"R", "S", "T"});
   Clock::time_point end_join = Clock::now();
 
   cout << "done performing join" << endl;

@@ -9,15 +9,15 @@
 
 using namespace std;
 
-Relation::Relation(const string& filename, string relation_name, vector<string> attrs): attrs_(attrs), relation_name_(relation_name), root_(new TrieNode()) {
-
+TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
   vector<pair<string, int>> attrs_with_indexes;
-  for (int i = 0; i < attrs_.size(); i++) {
-    attrs_with_indexes.push_back(make_pair(attrs_[i], i));
+  for (int i = 0; i < attrs.size(); i++) {
+    attrs_with_indexes.push_back(make_pair(attrs[i], i));
   }
   sort(attrs_with_indexes.begin(), attrs_with_indexes.end());
-  sort(attrs_.begin(), attrs_.end());
-  root_->set_attr(attrs_[0]);
+  sort(attrs.begin(), attrs.end());
+
+  TrieNode* root = new TrieNode(attrs[0]);
 
   ifstream ifs(filename);
 
@@ -39,36 +39,35 @@ Relation::Relation(const string& filename, string relation_name, vector<string> 
     if (ordered_tuple.size() != attrs.size()) {
       throw runtime_error("tuple length does not match attributes length");
     }
-    root_->InsertTuple(ordered_tuple.begin(), ordered_tuple.end(), attrs_.begin(), attrs_.end());
+
+    root->InsertTuple(ordered_tuple.begin(), ordered_tuple.end(), attrs.begin(), attrs.end());
   }
+  return root;
 }
 
-bool Relation::ContainsAttribute(const string& attr) const {
-  return binary_search(attrs_.begin(), attrs_.end(), attr);
+bool TrieNode::ContainsAttribute(const string& attr) const {
+  if (attr_ == attr) {
+    return true;
+  }
+
+  if (children_.empty() || !children_[0]) {
+    return false;
+  }
+
+  return children_[0]->ContainsAttribute(attr);
 }
 
-const vector<int>* Relation::MatchingValues(const string& attr,
-                                            const unordered_map<string, int>& bound_attrs) const {
-  return root_->MatchingValues(attr, bound_attrs);
+vector<string> TrieNode::attrs() const {
+  if (children_.empty() || !children_[0]) {
+    return vector<string>({attr_});
+  }
+
+  vector<string> node_attrs = children_[0]->attrs();
+  node_attrs.insert(node_attrs.begin(), attr_);
+  return node_attrs;
 }
 
-const vector<string>& Relation::attrs() const {
-  return attrs_;
-}
-
-int Relation::size() const {
-  return root_->size();
-}
-
-bool Relation::contains(const vector<int>& tuple) const {
-  return root_->contains(tuple);
-}
-
-vector<vector<int>> Relation::MakeTuples() const {
-  return root_->MakeTuples();
-}
-
-ostream& operator<<(ostream& os, const Relation& rel) {
+ostream& operator<<(ostream& os, const TrieNode& rel) {
   for (const string& attr : rel.attrs()) {
     cout << attr << "\t";
   }
@@ -88,8 +87,8 @@ ostream& operator<<(ostream& os, const Relation& rel) {
 vector<vector<int>> TrieNode::MakeTuples() const {
   vector<vector<int>> tuples;
 
-  for (int i = 0; i < values_.size(); i++) {
-    int val = values_[i];
+  for (int i = 0; i < values_->size(); i++) {
+    int val = values_->at(i);
     const unique_ptr<TrieNode>& child_ptr = children_[i];
     if (!child_ptr) {
       tuples.push_back(vector<int>({val}));
@@ -106,7 +105,7 @@ vector<vector<int>> TrieNode::MakeTuples() const {
 
 int TrieNode::size() const {
   int result = 0;
-  for (int i = 0; i < values_.size(); i++) {
+  for (int i = 0; i < values_->size(); i++) {
     const unique_ptr<TrieNode>& child_ptr = children_[i];
     if (child_ptr) {
       result += child_ptr->size();
@@ -120,17 +119,17 @@ int TrieNode::size() const {
 const vector<int>* TrieNode::MatchingValues(const string& attr,
                                             const unordered_map<string, int>& bound_attrs) const {
   if (attr == attr_) {
-    return &values_;
+    return values_.get();
   }
 
   assert(bound_attrs.count(attr_));
 
-  auto val_ptr = lower_bound(values_.begin(), values_.end(), bound_attrs.at(attr_));
-  if (val_ptr == values_.end() || *val_ptr != bound_attrs.at(attr_)) {
+  auto val_ptr = lower_bound(values_->begin(), values_->end(), bound_attrs.at(attr_));
+  if (val_ptr == values_->end() || *val_ptr != bound_attrs.at(attr_)) {
     return nullptr;
   }
 
-  int index = val_ptr - values_.begin();
+  int index = val_ptr - values_->begin();
   return children_[index]->MatchingValues(attr, bound_attrs);
 }
 
@@ -141,11 +140,11 @@ void TrieNode::InsertTuple(vector<int>::iterator tuple_start,
   assert(tuple_end - tuple_start == attr_end - attr_start);
   assert(attr_ == *attr_start);
 
-  auto val_ptr = lower_bound(values_.begin(), values_.end(), *tuple_start);
-  int index = val_ptr - values_.begin();
+  auto val_ptr = lower_bound(values_->begin(), values_->end(), *tuple_start);
+  int index = val_ptr - values_->begin();
 
-  if (val_ptr == values_.end() || *val_ptr != *tuple_start) {
-    values_.insert(val_ptr, *tuple_start);
+  if (val_ptr == values_->end() || *val_ptr != *tuple_start) {
+    values_->insert(val_ptr, *tuple_start);
 
     if (tuple_start+1 != tuple_end) {
       children_.insert(children_.begin()+index,
@@ -165,13 +164,13 @@ bool TrieNode::contains(const vector<int>& tuple) const {
     throw runtime_error("tuple passed to contains() is too short");
   }
 
-  auto val_ptr = lower_bound(values_.begin(), values_.end(), tuple[0]);
+  auto val_ptr = lower_bound(values_->begin(), values_->end(), tuple[0]);
   if (*val_ptr != tuple[0]) {
     // lower_bound() didn't find a match.
     return false;
   }
 
-  int index = val_ptr - values_.begin();
+  int index = val_ptr - values_->begin();
   const auto& child_ptr = children_[index];
 
   if (child_ptr) {
@@ -188,8 +187,8 @@ bool TrieNode::contains(const vector<int>& tuple) const {
 
 
 void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
-  assert(values_.empty() || value > values_.back());
-  values_.push_back(value);
+  assert(values_->empty() || value > values_->back());
+  values_->push_back(value);
   children_.push_back(unique_ptr<TrieNode>(child_ptr));
-  assert(values_.size() == children_.size());
+  assert(values_->size() == children_.size());
 }

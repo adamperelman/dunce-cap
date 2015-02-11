@@ -10,15 +10,16 @@ bool vectorLengthCmp(const vector<int>* a, const vector<int>* b) {
 }
 
 // TODO: replace with better algorithm (e.g. EmptyHeaded)
-vector<int> Intersection(vector<const vector<int>*>& ordered_sets) {
+vector<int>* Intersection(vector<const vector<int>*>& ordered_sets) {
   sort(ordered_sets.begin(), ordered_sets.end(), vectorLengthCmp);
-  vector<int> intersection(*(ordered_sets.at(0)));
+  vector<int>* intersection = new vector<int>(*ordered_sets[0]);
   for (int i = 1; i < ordered_sets.size(); i++) {
-    vector<int> temp;
-    temp.reserve(intersection.size());
-    set_intersection(intersection.begin(), intersection.end(),
+    vector<int>* temp = new vector<int>();
+    temp->reserve(intersection->size());
+    set_intersection(intersection->begin(), intersection->end(),
                      ordered_sets.at(i)->begin(), ordered_sets.at(i)->end(),
-                     inserter(temp, temp.begin()));
+                     inserter(*temp, temp->begin()));
+    delete intersection;
     intersection = temp;
   }
 
@@ -28,13 +29,13 @@ vector<int> Intersection(vector<const vector<int>*>& ordered_sets) {
 
 // TODO: should we be passing a reference to free_attrs and bound_attrs
 // instead of making copies?
-TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
+TrieNode* GenericJoinInternal(const vector<TrieNode*>& relations,
                               vector<string>::iterator free_attrs_begin,
                               vector<string>::iterator free_attrs_end,
                               unordered_map<string, int> bound_attrs) {
   if (free_attrs_begin + 1 == free_attrs_end) {
     vector<const vector<int>*> matching_relations;
-    for (const Relation* rel : relations) {
+    for (const TrieNode* rel : relations) {
       if (rel->ContainsAttribute(*free_attrs_begin)) {
         const vector<int>* vals = rel->MatchingValues(*free_attrs_begin, bound_attrs);
         if (vals) {
@@ -60,25 +61,26 @@ TrieNode* GenericJoinInternal(const vector<Relation*>& relations,
   return result;
 }
 
-void Database::AddRelation(Relation* relation) {
-  tables_.emplace(relation->name(), unique_ptr<Relation>(relation));
+void Database::AddRelation(const string& name, TrieNode* relation) {
+  tables_.emplace(name, unique_ptr<TrieNode>(relation));
 }
 
-Relation* Database::GenericJoin(const vector<string>& names) const {
-  vector<Relation*> rels_to_join;
+TrieNode* Database::GenericJoin(const vector<string>& names) const {
+  vector<TrieNode*> rels_to_join;
 
   set<string> attrs;
   for (const string& name : names) {
-    Relation* r = tables_.at(name).get();
+    TrieNode* r = tables_.at(name).get();
     rels_to_join.push_back(r);
-    attrs.insert(r->attrs().begin(), r->attrs().end());
+    for (const string& attr : r->attrs()) {
+      attrs.insert(attr);
+    }
   }
 
   vector<string> ordered_attrs(attrs.begin(), attrs.end());
   unordered_map<string, int> bound_attrs; // Nothing is bound yet.
 
-  TrieNode* root = GenericJoinInternal(rels_to_join, ordered_attrs.begin(), ordered_attrs.end(), bound_attrs);
-  return new Relation(ordered_attrs, root);
+  return GenericJoinInternal(rels_to_join, ordered_attrs.begin(), ordered_attrs.end(), bound_attrs);
 }
 
 ostream& operator<<(ostream& os, const Database& db) {
