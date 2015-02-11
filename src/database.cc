@@ -54,6 +54,8 @@ TrieNode* GenericJoinInternal(const vector<TrieNode*>& relations,
     TrieNode* righthand_vals = GenericJoinInternal(relations, free_attrs_begin + 1, free_attrs_end, bound_attrs);
     if (righthand_vals->size() > 0) {
       result->AddChildNode(val, righthand_vals); // this does the cartesian product
+    } else {
+      delete righthand_vals;
     }
   }
 
