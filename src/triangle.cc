@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "relation.h"
-#include "database.h"
+#include "generic_join.h"
 #include <algorithm>
 
 using namespace std;

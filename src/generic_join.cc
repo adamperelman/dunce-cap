@@ -1,4 +1,4 @@
-#include "database.h"
+#include "generic_join.h"
 #include <algorithm>
 #include <unordered_map>
 #include <iostream>
@@ -70,17 +70,11 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
   return result;
 }
 
-void Database::AddRelation(const string& name, TrieNode* relation) {
-  tables_.emplace(name, unique_ptr<TrieNode>(relation));
-}
 
-TrieNode* Database::GenericJoin(const vector<string>& names) const {
-  vector<const TrieNode*> rels_to_join;
+TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
 
   set<string> attrs;
-  for (const string& name : names) {
-    TrieNode* r = tables_.at(name).get();
-    rels_to_join.push_back(r);
+  for (const TrieNode* r : relations) {
     for (const string& attr : r->attrs()) {
       attrs.insert(attr);
     }
@@ -88,16 +82,6 @@ TrieNode* Database::GenericJoin(const vector<string>& names) const {
 
   vector<string> ordered_attrs(attrs.begin(), attrs.end());
 
-  return GenericJoinInternal(rels_to_join, ordered_attrs.begin(), ordered_attrs.end());
+  return GenericJoinInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
 }
 
-ostream& operator<<(ostream& os, const Database& db) {
-  for (auto rel_it = db.tables_.begin();
-       rel_it != db.tables_.end();
-       ++rel_it) {
-    cout << rel_it->first << endl;
-    cout << *(rel_it->second) << endl << endl;
-  }
-
-  return os;
-}
