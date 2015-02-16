@@ -8,17 +8,19 @@
 using namespace std;
 
 TEST_CASE("Tadpole query") {
-  vector<vector<TrieNode*>> bags(3);
-  bags[0].push_back(TrieNode::FromFile("data/tadpole.txt", {"a", "b"}));
-  bags[0].push_back(TrieNode::FromFile("data/tadpole.txt", {"b", "c"}));
-  bags[0].push_back(TrieNode::FromFile("data/tadpole.txt", {"c", "d"}));
-  bags[0].push_back(TrieNode::FromFile("data/tadpole.txt", {"d", "a"}));
+  unique_ptr<BagNode> root_bag(new BagNode);
+  root_bag->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"a", "e"}));
 
-  bags[1].push_back(TrieNode::FromFile("data/tadpole.txt", {"a", "e"}));
+  root_bag->children.push_back(unique_ptr<BagNode>(new BagNode));
+  root_bag->children[0]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"e", "f"}));
 
-  bags[2].push_back(TrieNode::FromFile("data/tadpole.txt", {"e", "f"}));
+  root_bag->children.push_back(unique_ptr<BagNode>(new BagNode));
+  root_bag->children[1]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"a", "b"}));
+  root_bag->children[1]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"b", "c"}));
+  root_bag->children[1]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"c", "d"}));
+  root_bag->children[1]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"d", "a"}));
 
-  TrieNode* result = YannakakisJoin(bags);
+  TrieNode* result = YannakakisJoin(root_bag);
 
   REQUIRE(result->size() == 1);
   vector<string> expected_attrs = {"a", "b", "c", "d", "e", "f"};
