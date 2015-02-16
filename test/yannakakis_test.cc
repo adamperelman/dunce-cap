@@ -20,10 +20,10 @@ TEST_CASE("Tadpole query") {
   root_bag->children[1]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"c", "d"}));
   root_bag->children[1]->relations.push_back(TrieNode::FromFile("data/tadpole.txt", {"d", "a"}));
 
-  TrieNode* result = YannakakisJoin(root_bag);
+  TrieNode* result = YannakakisJoin(root_bag.get());
 
   REQUIRE(result->size() == 1);
   vector<string> expected_attrs = {"a", "b", "c", "d", "e", "f"};
-  REQUIRE(result->attrs() == expected_attrs());
+  REQUIRE(result->attrs() == expected_attrs);
   REQUIRE(result->contains({1, 2, 3, 4, 5, 6}));
 }

@@ -2,7 +2,7 @@
 #include "catch.h"
 
 #include "../src/relation.h"
-#include "../src/database.h"
+#include "../src/generic_join.h"
 #include <memory>
 
 using namespace std;
