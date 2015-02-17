@@ -6,8 +6,17 @@
 #include <vector>
 #include <set>
 #include <memory>
-#include <unordered_map>
+#include <unordered_set>
 #include <stack>
+#include <boost/functional/hash.hpp>
+
+struct tuple_hash {
+  size_t operator()(const std::vector<int>& tuple) const {
+    return boost::hash_range(tuple.begin(), tuple.end());
+  }
+};
+
+typedef std::unordered_set<std::vector<int>, tuple_hash> tuple_set;
 
 class TrieNode {
 public:
@@ -44,6 +53,8 @@ public:
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
+  TrieNode* LeftSemijoin(const TrieNode* other) const;
+  std::pair<std::vector<int>, std::vector<int>> SharedAttributeIndexes(const TrieNode* other) const;
   class const_iterator {
   public:
     const_iterator(const TrieNode* root);

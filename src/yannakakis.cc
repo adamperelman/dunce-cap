@@ -14,7 +14,7 @@ void JoinWithinBags(BagNode* root_bag) {
 
 void LeftSemijoinWithChildren(BagNode* root_bag) {
   for (const auto& child : root_bag->children) {
-    LeftSemiJoinWithChildren(child.get());
+    LeftSemijoinWithChildren(child.get());
     root_bag->joined->LeftSemijoin(child->joined.get());
   }
 }

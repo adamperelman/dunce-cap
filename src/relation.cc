@@ -217,6 +217,61 @@ void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
   assert(values_->size() == children_.size());
 }
 
+pair<vector<int>, vector<int>> TrieNode::SharedAttributeIndexes(const TrieNode* other) const {
+  int this_index = 0;
+  int other_index = 0;
+
+  vector<string> this_attrs = attrs();
+  vector<string> other_attrs = other->attrs();
+
+  pair<vector<int>, vector<int>> result;
+  while (this_index < this_attrs.size() && other_index < other_attrs.size()) {
+    if (this_attrs[this_index] == other_attrs[other_index]) {
+      result.first.push_back(this_index++);
+      result.second.push_back(other_index++);
+    } else if (this_attrs[this_index] < other_attrs[other_index]) {
+      this_index++;
+    } else {
+      other_index++;
+    }
+  }
+  return result;
+}
+
+TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
+  pair<vector<int>, vector<int>> shared_attr_indexes = SharedAttributeIndexes(other);
+  unordered_set<vector<int>, tuple_hash> other_tuples;
+  vector<int> buffer(shared_attr_indexes.first.size());
+
+  for (TrieNode::const_iterator it = other->begin(); it != other->end(); ++it) {
+    for(int i=0; i<buffer.size(); ++i) {
+      buffer[i] = it->at(shared_attr_indexes.second.at(i));
+    }
+    other_tuples.insert(buffer);
+  }
+
+  TrieNode* new_relation = new TrieNode(attr_);
+  vector<string> new_relation_attrs;
+  new_relation_attrs.reserve(buffer.size());
+  vector<string> this_attrs = attrs();
+  for (int attr_index : shared_attr_indexes.first) {
+    new_relation_attrs.push_back(this_attrs[attr_index]);
+  }
+
+  for (TrieNode::const_iterator it = begin(); it != end(); ++it) {
+     for(int i=0; i<buffer.size(); ++i) {
+      buffer[i] = it->at(shared_attr_indexes.first.at(i));
+    }
+    if (other_tuples.count(buffer)) {
+      new_relation->AppendTuple(it->begin(),
+                                it->end(),
+                                new_relation_attrs.begin(),
+                                new_relation_attrs.end());
+    }
+  }
+  return new_relation;
+}
+
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {
   const TrieNode* current_node = root;
   while (current_node) {
@@ -250,6 +305,7 @@ TrieNode::const_iterator& TrieNode::const_iterator::operator++() {
 
   return *this;
 }
+
 
 bool operator==(const TrieNode::const_iterator& a, const TrieNode::const_iterator& b) {
   // For now, we just consider them to be equal if their stacks are empty
