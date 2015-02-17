@@ -15,6 +15,22 @@ TEST_CASE("Relations are created correctly") {
   REQUIRE(!r->contains({3,2}));
 }
 
+TEST_CASE("Iterating over a relation") {
+  TrieNode* r = TrieNode::FromFile("data/simple.txt", {"a", "b"});
+
+  vector<vector<int>> expected_vals = {{1, 3}, {1, 4}, {2, 3}, {2, 4}};
+
+  int i = 0;
+  for (TrieNode::iterator it = r->begin();
+       it != r->end();
+       ++it) {
+    REQUIRE(*it == expected_vals[i]);
+    ++i;
+  }
+
+  REQUIRE(i == 4);
+}
+
 TEST_CASE("Make sure we can create a relation with 3 attrs") {
   TrieNode* r = TrieNode::FromFile("data/triples.txt", {"c", "a", "b"});
   REQUIRE(r->size() == 3);
