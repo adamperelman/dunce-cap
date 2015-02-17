@@ -37,4 +37,4 @@ relation.o: src/relation.cc
 	$(CC) $(CFLAGS) -c src/relation.cc
 
 clean:
-	$(RM) *.o *~
+	$(RM) *.o *~ *.exe
