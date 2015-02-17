@@ -41,3 +41,29 @@ TEST_CASE("Make sure we can create a relation with 3 attrs") {
   vector<string> expected_attrs({"a", "b", "c"});
   REQUIRE(r->attrs() == expected_attrs);
 }
+
+TEST_CASE("Nodes are appended correctly") {
+  vector<string> attrs = {"a", "b", "c"};
+  unique_ptr<TrieNode> r(new TrieNode("a"));
+
+  vector<vector<int>> tuples = {
+    {1, 1, 1},
+    {1, 1, 2},
+    {1, 2, 1},
+    {1, 2, 2},
+    {2, 1, 1}
+  };
+
+  for (const vector<int>& t : tuples) {
+    r->AppendTuple(t.begin(), t.end(), attrs.begin(), attrs.end());
+  }
+
+  int i = 0;
+  for (TrieNode::const_iterator it = r->begin();
+       it != r->end();
+       ++it) {
+    REQUIRE(*it == tuples[i]);
+    ++i;
+  }
+  REQUIRE(i == tuples.size());
+}
