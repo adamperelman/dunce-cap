@@ -167,14 +167,14 @@ void TrieNode::AppendTuple(vector<int>::iterator tuple_start,
   assert(tuple_end - tuple_start == attr_end - attr_start);
   assert(attr_ == *attr_start);
 
-  if (values_->empty() || *tuple_start > value_->back()) {
+  if (values_->empty() || *tuple_start > values_->back()) {
     values_->push_back(*tuple_start);
     if (tuple_start+1 != tuple_end) {
       children_.push_back(unique_ptr<TrieNode>(new TrieNode(*(attr_start+1))));
     } else {
       children_.push_back(unique_ptr<TrieNode>(nullptr));
     }
-  } else if (*tuple_start != value_->back()) {
+  } else if (*tuple_start != values_->back()) {
     throw runtime_error("Cannot call AppendTuple for tuple out of nondecreasing order");
   }
 
@@ -217,17 +217,17 @@ void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
   assert(values_->size() == children_.size());
 }
 
-TrieNode::iterator::iterator(TrieNode* root) {
-  TrieNode* current_node = root;
+TrieNode::const_iterator::const_iterator(const TrieNode* root) {
+  const TrieNode* current_node = root;
   while (current_node) {
     // TODO: this assumes that all nodes have size > 0; is this true??
-    node_indexes_.push_back(make_pair(current_node, 0));
+    node_indexes_.push(make_pair(current_node, 0));
     current_tuple_.push_back(current_node->values()->at(0));
-    current_node = current_node->children().at(0);
+    current_node = current_node->children().at(0).get();
   }
 }
 
-TrieNode::iterator& TrieNode::iterator::operator++() {
+TrieNode::const_iterator& TrieNode::const_iterator::operator++() {
   // Pop off nodes with no more values.
   while (node_indexes_.top().second == node_indexes_.top().first->values()->size() - 1) {
     node_indexes_.pop();
@@ -243,10 +243,35 @@ TrieNode::iterator& TrieNode::iterator::operator++() {
   current_tuple_.back() = node_indexes_.top().first->values()->at(node_indexes_.top().second);
 
   // Walk down to child (if possible).
-  while (TrieNode* child = node_indexes_.top().first()->children[0]) {
+  while (const TrieNode* child = node_indexes_.top().first->children()[0].get()) {
     node_indexes_.push(make_pair(child, 0));
     current_tuple_.push_back(child->values()->at(0));
   }
 
   return *this;
+}
+
+bool operator==(const TrieNode::const_iterator& a, const TrieNode::const_iterator& b) {
+  // For now, we just consider them to be equal if their stacks are empty
+  return a.node_indexes_.empty() && b.node_indexes_.empty();
+}
+
+bool operator!=(const TrieNode::const_iterator& a, const TrieNode::const_iterator& b) {
+  return !(a==b);
+}
+
+const vector<int>& TrieNode::const_iterator::operator*() const {
+  return current_tuple_;
+}
+
+const vector<int>* TrieNode::const_iterator::operator->() const {
+  return &current_tuple_;
+}
+
+TrieNode::const_iterator TrieNode::begin() const {
+  return TrieNode::const_iterator(this);
+}
+
+TrieNode::const_iterator TrieNode::end() const {
+  return TrieNode::const_iterator(NULL);
 }

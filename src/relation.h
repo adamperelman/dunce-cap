@@ -7,6 +7,7 @@
 #include <set>
 #include <memory>
 #include <unordered_map>
+#include <stack>
 
 class TrieNode {
 public:
@@ -37,19 +38,22 @@ public:
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
-  class iterator {
+  class const_iterator {
   public:
-    iterator(TrieNode* root);
-    iterator& operator++();
-    friend bool operator==(iterator a, iterator b);
-    friend bool operator!=(iterator a, iterator b);
-    std::vector<int>& operator*() const;
-    std::vector<int>* operator->() const;
+    const_iterator(const TrieNode* root);
+    const_iterator& operator++();
+    friend bool operator==(const const_iterator& a, const const_iterator& b);
+    friend bool operator!=(const const_iterator& a, const const_iterator& b);
+    const std::vector<int>& operator*() const;
+    const std::vector<int>* operator->() const;
 
   private:
-    std::stack<std::pair<TrieNode*, int>> node_indexes_;
+    std::stack<std::pair<const TrieNode*, int>> node_indexes_;
     std::vector<int> current_tuple_;
   };
+
+  const_iterator begin() const;
+  const_iterator end() const;
 
 private:
   std::string attr_;
