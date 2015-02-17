@@ -21,7 +21,7 @@ TEST_CASE("Iterating over a relation") {
   vector<vector<int>> expected_vals = {{1, 3}, {1, 4}, {2, 3}, {2, 4}};
 
   int i = 0;
-  for (TrieNode::iterator it = r->begin();
+  for (TrieNode::const_iterator it = r->begin();
        it != r->end();
        ++it) {
     REQUIRE(*it == expected_vals[i]);
