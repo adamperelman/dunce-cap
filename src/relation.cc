@@ -159,6 +159,30 @@ void TrieNode::InsertTuple(vector<int>::iterator tuple_start,
   }
 }
 
+void TrieNode::AppendTuple(vector<int>::iterator tuple_start,
+                           vector<int>::iterator tuple_end,
+                           vector<string>::iterator attr_start,
+                           vector<string>::iterator attr_end) {
+
+  assert(tuple_end - tuple_start == attr_end - attr_start);
+  assert(attr_ == *attr_start);
+
+  if (values_->empty() || *tuple_start > value_->back()) {
+    values_->push_back(*tuple_start);
+    if (tuple_start+1 != tuple_end) {
+      children_.push_back(unique_ptr<TrieNode>(new TrieNode(*(attr_start+1))));
+    } else {
+      children_.push_back(unique_ptr<TrieNode>(nullptr));
+    }
+  } else if (*tuple_start != value_->back()) {
+    throw runtime_error("Cannot call AppendTuple for tuple out of nondecreasing order");
+  }
+
+  if (tuple_start+1 != tuple_end) {
+    children_.back()->AppendTuple(tuple_start+1, tuple_end, attr_start+1, attr_end);
+  }
+}
+
 bool TrieNode::contains(const vector<int>& tuple) const {
   if (tuple.empty()) {
     throw runtime_error("tuple passed to contains() is too short");

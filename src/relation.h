@@ -42,6 +42,11 @@ private:
   std::unique_ptr<std::vector<int>> values_;
   std::vector<std::unique_ptr<TrieNode>> children_;
 
+  void AppendTuple(std::vector<int>::iterator tuple_start,
+                   std::vector<int>::iterator tuple_end,
+                   std::vector<std::string>::iterator attr_start,
+                   std::vector<std::string>::iterator attr_end);
+
   friend std::ostream& operator<<(std::ostream& os, const TrieNode& rel);
 };
 
