@@ -37,6 +37,20 @@ public:
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
+  class iterator {
+  public:
+    iterator(TrieNode* root);
+    iterator& operator++();
+    friend bool operator==(iterator a, iterator b);
+    friend bool operator!=(iterator a, iterator b);
+    std::vector<int>& operator*() const;
+    std::vector<int>* operator->() const;
+
+  private:
+    std::stack<std::pair<TrieNode*, int>> node_indexes_;
+    std::vector<int> current_tuple_;
+  };
+
 private:
   std::string attr_;
   std::unique_ptr<std::vector<int>> values_;

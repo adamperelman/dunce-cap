@@ -216,3 +216,37 @@ void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
   children_.push_back(unique_ptr<TrieNode>(child_ptr));
   assert(values_->size() == children_.size());
 }
+
+TrieNode::iterator::iterator(TrieNode* root) {
+  TrieNode* current_node = root;
+  while (current_node) {
+    // TODO: this assumes that all nodes have size > 0; is this true??
+    node_indexes_.push_back(make_pair(current_node, 0));
+    current_tuple_.push_back(current_node->values()->at(0));
+    current_node = current_node->children().at(0);
+  }
+}
+
+TrieNode::iterator& TrieNode::iterator::operator++() {
+  // Pop off nodes with no more values.
+  while (node_indexes_.top().second == node_indexes_.top().first->values()->size() - 1) {
+    node_indexes_.pop();
+    current_tuple_.pop_back();
+    if (node_indexes_.empty()) {
+      // We're done iterating.
+      return *this;
+    }
+  }
+
+  // Increment our current node's index.
+  node_indexes_.top().second++;
+  current_tuple_.back() = node_indexes_.top().first->values()->at(node_indexes_.top().second);
+
+  // Walk down to child (if possible).
+  while (TrieNode* child = node_indexes_.top().first()->children[0]) {
+    node_indexes_.push(make_pair(child, 0));
+    current_tuple_.push_back(child->values()->at(0));
+  }
+
+  return *this;
+}
