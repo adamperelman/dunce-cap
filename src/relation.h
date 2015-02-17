@@ -24,6 +24,12 @@ public:
                    std::vector<int>::iterator tuple_end,
                    std::vector<std::string>::iterator attr_start,
                    std::vector<std::string>::iterator attr_end);
+
+  void AppendTuple(std::vector<int>::const_iterator tuple_start,
+                   std::vector<int>::const_iterator tuple_end,
+                   std::vector<std::string>::const_iterator attr_start,
+                   std::vector<std::string>::const_iterator attr_end);
+
   std::vector<std::vector<int>> MakeTuples() const;
 
   int size() const; // TODO change this to cache size in each trienode
@@ -59,11 +65,6 @@ private:
   std::string attr_;
   std::unique_ptr<std::vector<int>> values_;
   std::vector<std::unique_ptr<TrieNode>> children_;
-
-  void AppendTuple(std::vector<int>::iterator tuple_start,
-                   std::vector<int>::iterator tuple_end,
-                   std::vector<std::string>::iterator attr_start,
-                   std::vector<std::string>::iterator attr_end);
 
   friend std::ostream& operator<<(std::ostream& os, const TrieNode& rel);
 };

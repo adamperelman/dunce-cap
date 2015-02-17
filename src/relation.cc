@@ -159,10 +159,10 @@ void TrieNode::InsertTuple(vector<int>::iterator tuple_start,
   }
 }
 
-void TrieNode::AppendTuple(vector<int>::iterator tuple_start,
-                           vector<int>::iterator tuple_end,
-                           vector<string>::iterator attr_start,
-                           vector<string>::iterator attr_end) {
+void TrieNode::AppendTuple(vector<int>::const_iterator tuple_start,
+                           vector<int>::const_iterator tuple_end,
+                           vector<string>::const_iterator attr_start,
+                           vector<string>::const_iterator attr_end) {
 
   assert(tuple_end - tuple_start == attr_end - attr_start);
   assert(attr_ == *attr_start);
@@ -243,7 +243,7 @@ TrieNode::const_iterator& TrieNode::const_iterator::operator++() {
   current_tuple_.back() = node_indexes_.top().first->values()->at(node_indexes_.top().second);
 
   // Walk down to child (if possible).
-  while (const TrieNode* child = node_indexes_.top().first->children()[0].get()) {
+  while (const TrieNode* child = node_indexes_.top().first->children()[node_indexes_.top().second].get()) {
     node_indexes_.push(make_pair(child, 0));
     current_tuple_.push_back(child->values()->at(0));
   }
