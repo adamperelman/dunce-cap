@@ -10,14 +10,6 @@
 #include <stack>
 #include <boost/functional/hash.hpp>
 
-struct tuple_hash {
-  size_t operator()(const std::vector<int>& tuple) const {
-    return boost::hash_range(tuple.begin(), tuple.end());
-  }
-};
-
-typedef std::unordered_set<std::vector<int>, tuple_hash> tuple_set;
-
 class TrieNode {
 public:
   TrieNode(const std::string& attr) : attr_(attr), values_(new std::vector<int>) {}

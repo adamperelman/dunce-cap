@@ -67,3 +67,17 @@ TEST_CASE("Nodes are appended correctly") {
   }
   REQUIRE(i == tuples.size());
 }
+
+TEST_CASE("left semi join works") {
+  TrieNode* from = TrieNode::FromFile("data/semijoin_test1.txt", {"a", "b", "d"});
+  TrieNode* filter = TrieNode::FromFile("data/semijoin_test2.txt", {"b", "c", "d", "e"});
+
+  TrieNode* result = from->LeftSemijoin(filter);
+
+  REQUIRE(result->size() == 2);
+  REQUIRE(result->contains({7, 8, 9}));
+  REQUIRE(result->contains({10, 11, 12}));
+
+  vector<string> expected_attrs = {"a", "b", "d"};
+  REQUIRE(result->attrs() == expected_attrs);
+}

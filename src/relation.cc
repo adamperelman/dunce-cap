@@ -9,6 +9,12 @@
 
 using namespace std;
 
+struct tuple_hash {
+  size_t operator()(const std::vector<int>& tuple) const {
+    return boost::hash_range(tuple.begin(), tuple.end());
+  }
+};
+
 TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
   vector<pair<string, int>> attrs_with_indexes;
   for (int i = 0; i < attrs.size(); i++) {
@@ -251,12 +257,7 @@ TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
   }
 
   TrieNode* new_relation = new TrieNode(attr_);
-  vector<string> new_relation_attrs;
-  new_relation_attrs.reserve(buffer.size());
   vector<string> this_attrs = attrs();
-  for (int attr_index : shared_attr_indexes.first) {
-    new_relation_attrs.push_back(this_attrs[attr_index]);
-  }
 
   for (TrieNode::const_iterator it = begin(); it != end(); ++it) {
      for(int i=0; i<buffer.size(); ++i) {
@@ -265,8 +266,8 @@ TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
     if (other_tuples.count(buffer)) {
       new_relation->AppendTuple(it->begin(),
                                 it->end(),
-                                new_relation_attrs.begin(),
-                                new_relation_attrs.end());
+                                this_attrs.begin(),
+                                this_attrs.end());
     }
   }
   return new_relation;
