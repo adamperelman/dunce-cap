@@ -45,6 +45,9 @@ public:
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
 
+  std::pair<std::vector<int>, std::vector<int>> OriginalToJoinedIndexes(const TrieNode* other) const;
+  std::vector<int> DisjointAttributeIndexes(const TrieNode* other) const;
+  std::vector<std::string> JoinedAttributes(const TrieNode* other) const;
   TrieNode* LeftSemijoin(const TrieNode* other) const;
   TrieNode* Join(const TrieNode* other) const;
 

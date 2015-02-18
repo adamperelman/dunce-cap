@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <unordered_map>
 
 using namespace std;
 
@@ -273,6 +274,66 @@ TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
   return new_relation;
 }
 
+vector<string> TrieNode::JoinedAttributes(const TrieNode* other) const {
+  vector<string> other_attrs = other->attrs();
+  vector<string> this_attrs = attrs();
+  set<string> joined_attrs(other_attrs.begin(), other_attrs.end());
+  joined_attrs.insert(this_attrs.begin(), this_attrs.end());
+  return vector<string>(joined_attrs.begin(), joined_attrs.end());
+}
+
+// get other's disjoint attrs
+vector<int> TrieNode::DisjointAttributeIndexes(const TrieNode* other) const {
+  vector<string> other_attrs = other->attrs();
+  vector<string> this_attrs = attrs();
+  vector<int> result;
+  for(int i=0; i < other_attrs.size(); ++i) {
+    if (!binary_search(this_attrs.begin(), this_attrs.end(), other_attrs[i])) {
+      result.push_back(i);
+    }
+  }
+  return result;
+}
+
+pair<vector<int>, vector<int>> TrieNode::OriginalToJoinedIndexes(const TrieNode* other) const {
+  vector<string> other_attrs = other->attrs();
+  vector<string> this_attrs = attrs();
+  vector<string>::iterator this_it = this_attrs.begin();
+  vector<string>::iterator other_it = other_attrs.begin();
+  int joined_index = 0;
+  pair<vector<int>, vector<int>> result;
+
+  while (this_it != this_attrs.end() && other_it != other_attrs.end()) {
+    if (*this_it < *other_it) {
+      result.first.push_back(joined_index);
+      ++this_it;
+    } else if (*this_it > *other_it) {
+      result.second.push_back(joined_index);
+      ++other_it;
+    } else {
+      result.first.push_back(joined_index);
+      result.second.push_back(joined_index);
+      ++this_it;
+      ++other_it;
+    }
+    joined_index++;
+  }
+
+  while (this_it != this_attrs.end()) {
+    result.first.push_back(joined_index);
+    ++this_it;
+    ++joined_index;
+  }
+
+  while (other_it != other_attrs.end()) {
+    result.second.push_back(joined_index);
+    ++other_it;
+    ++joined_index;
+  }
+
+  return result;
+}
+
 TrieNode* TrieNode::Join(const TrieNode* other) const {
   pair<vector<int>, vector<int>> shared_attr_indexes = SharedAttributeIndexes(other);
   vector<int> other_disjoint_attr_indexes = DisjointAttributeIndexes(other);
@@ -311,8 +372,10 @@ TrieNode* TrieNode::Join(const TrieNode* other) const {
       }
       for (const vector<int>& matching_tuple : other_tuples[key_buffer]) {
         // Set the values in our buffer that come from the other relation's tuple.
-        for (int i = 0; i < matching_tuple.size(); ++i) {
-          joined_tuple_buffer[orig_to_joined_indexes.second[i]] = matching_tuple[i];
+        for (int i = 0; i < other_disjoint_attr_indexes.size(); ++i) {
+          int orig_index = other_disjoint_attr_indexes[i];
+          int joined_index = orig_to_joined_indexes.second[orig_index];
+          joined_tuple_buffer[joined_index] = matching_tuple[i];
         }
 
         // TODO: InsertTuple is slow!
