@@ -46,6 +46,8 @@ public:
   void AddChildNode(int value, TrieNode* child_ptr);
 
   TrieNode* LeftSemijoin(const TrieNode* other) const;
+  TrieNode* Join(const TrieNode* other) const;
+
   std::pair<std::vector<int>, std::vector<int>> SharedAttributeIndexes(const TrieNode* other) const;
   class const_iterator {
   public:

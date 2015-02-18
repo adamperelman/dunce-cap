@@ -273,6 +273,60 @@ TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
   return new_relation;
 }
 
+TrieNode* TrieNode::Join(const TrieNode* other) const {
+  pair<vector<int>, vector<int>> shared_attr_indexes = SharedAttributeIndexes(other);
+  vector<int> other_disjoint_attr_indexes = DisjointAttributeIndexes(other);
+
+  unordered_map<vector<int>, vector<vector<int>>, tuple_hash> other_tuples;
+
+  vector<int> key_buffer(shared_attr_indexes.first.size());
+  vector<int> val_buffer(other_disjoint_attr_indexes.size());
+
+  for (TrieNode::const_iterator it = other->begin();
+       it != other->end();
+       ++it) {
+    for(int i = 0; i < key_buffer.size(); ++i) {
+      key_buffer[i] = it->at(shared_attr_indexes.second.at(i));
+    }
+    for (int i = 0; i < val_buffer.size(); ++i) {
+      val_buffer[i] = it->at(other_disjoint_attr_indexes.at(i));
+    }
+    other_tuples[key_buffer].push_back(val_buffer);
+  }
+
+  vector<string> joined_attrs = JoinedAttributes(other);
+  vector<int> joined_tuple_buffer = vector<int>(joined_attrs.size());
+  pair<vector<int>, vector<int>> orig_to_joined_indexes = OriginalToJoinedIndexes(other);
+
+  TrieNode* new_relation = new TrieNode(joined_attrs[0]);
+
+  for (TrieNode::const_iterator it = begin(); it != end(); ++it) {
+    for (int i = 0; i < key_buffer.size(); ++i) {
+      key_buffer[i] = it->at(shared_attr_indexes.first.at(i));
+    }
+    if (other_tuples.count(key_buffer)) {
+      // Set the values in our buffer that come from this relation's tuple.
+      for (int i = 0; i < it->size(); ++i) {
+        joined_tuple_buffer[orig_to_joined_indexes.first[i]] = it->at(i);
+      }
+      for (const vector<int>& matching_tuple : other_tuples[key_buffer]) {
+        // Set the values in our buffer that come from the other relation's tuple.
+        for (int i = 0; i < matching_tuple.size(); ++i) {
+          joined_tuple_buffer[orig_to_joined_indexes.second[i]] = matching_tuple[i];
+        }
+
+        // TODO: InsertTuple is slow!
+        new_relation->InsertTuple(joined_tuple_buffer.begin(),
+                                  joined_tuple_buffer.end(),
+                                  joined_attrs.begin(),
+                                  joined_attrs.end());
+      }
+    }
+  }
+
+  return new_relation;
+}
+
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {
   const TrieNode* current_node = root;
   while (current_node) {
