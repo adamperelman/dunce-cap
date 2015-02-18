@@ -15,20 +15,24 @@ void JoinWithinBags(BagNode* root_bag) {
 void LeftSemijoinWithChildren(BagNode* root_bag) {
   for (const auto& child : root_bag->children) {
     LeftSemijoinWithChildren(child.get());
-    root_bag->joined->LeftSemijoin(child->joined.get());
+    TrieNode* reduced = root_bag->joined->LeftSemijoin(child->joined.get());
+    root_bag->joined.reset(reduced);
   }
 }
 
-void LeftSemiJoinWithParent(BagNode* root_bag) {
-
+void LeftSemijoinWithParent(BagNode* root_bag) {
+  for (const auto& child : root_bag->children) {
+    TrieNode* reduced = child->joined->LeftSemijoin(root_bag->joined.get());
+    child->joined.reset(reduced);
+    LeftSemijoinWithParent(child.get());
+  }
 }
 
 TrieNode* YannakakisJoin(BagNode* root_bag) {
   JoinWithinBags(root_bag);
-
-
+  LeftSemijoinWithChildren(root_bag);
+  LeftSemijoinWithParent(root_bag);
   return NULL;
-
 }
 
 
