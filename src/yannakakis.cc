@@ -6,7 +6,6 @@ using namespace std;
 void JoinWithinBags(BagNode* root_bag) {
   TrieNode* new_relation = GenericJoin(root_bag->relations);
   root_bag->joined.reset(new_relation);
-  cout << *new_relation << endl;
   for (const auto& child : root_bag->children) {
     JoinWithinBags(child.get());
   }
@@ -26,8 +25,6 @@ void LeftSemijoinWithParent(BagNode* root_bag) {
     child->joined.reset(reduced);
     LeftSemijoinWithParent(child.get());
   }
-
-  cout << *(root_bag->joined) << endl;
 }
 
 void JoinWithChildren(BagNode* root_bag) {
@@ -45,5 +42,3 @@ TrieNode* YannakakisJoin(BagNode* root_bag) {
   JoinWithChildren(root_bag);
   return root_bag->joined.release();
 }
-
-
