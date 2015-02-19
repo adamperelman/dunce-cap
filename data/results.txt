@@ -1,0 +1,3 @@
+arxiv-gr:
+-9387008 4-cycles
+-391975461 tadpoles (4-cycle with tail of length 1)

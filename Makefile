@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS  = -g -Wall -std=c++0x -O0
+CFLAGS  = -g -Wall -std=c++0x -O3
 
 default: triangle
 
@@ -24,8 +24,14 @@ yannakakis_test.o: test/yannakakis_test.cc
 triangle: triangle.o relation.o generic_join.o
 	$(CC) $(CFLAGS) triangle.o relation.o generic_join.o -o triangle.exe
 
+tadpole: tadpole.o relation.o yannakakis.o generic_join.o
+	$(CC) $(CFLAGS) tadpole.o relation.o generic_join.o yannakakis.o -o tadpole.exe
+
 triangle.o: src/triangle.cc
 	$(CC) $(CFLAGS) -c src/triangle.cc
+
+tadpole.o: src/tadpole.cc
+	$(CC) $(CFLAGS) -c src/tadpole.cc
 
 generic_join.o: src/generic_join.h src/generic_join.cc
 	$(CC) $(CFLAGS) -c src/generic_join.cc
