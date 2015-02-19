@@ -35,3 +35,4 @@ GENERATED*
 callgrind.out.*
 annotated_*
 *.dSYM
+*.db
