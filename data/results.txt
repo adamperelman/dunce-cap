@@ -9,3 +9,7 @@
 *sqlite: 57s
 *GenericJoin (no Y): 21s
 *Y with pairwise performed by GJ: 20s
+
+341766305 lollipops (4-clique with tail of length1)
+*sqlite: 11m 45s
+*Y with pairwise performed by GJ: 17s
