@@ -1,9 +1,11 @@
 ***ARXIV-GR DATASET***
+488852 paths of length 2
+
 9387008 4-cycles
 *sqlite:
 *generic join: 1100ms
 
 391975461 tadpoles (4-cycle with tail of length 1)
-*Y with pairwise performed by GJ: 25s
 *sqlite: 57s
 *GenericJoin (no Y): 21s
+*Y with pairwise performed by GJ: 20s
