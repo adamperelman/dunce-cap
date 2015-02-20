@@ -1,4 +1,3 @@
-#include "relation.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -7,6 +6,9 @@
 #include <algorithm>
 #include <memory>
 #include <unordered_map>
+
+#include "relation.h"
+#include "generic_join.h"
 
 using namespace std;
 
@@ -335,7 +337,11 @@ pair<vector<int>, vector<int>> TrieNode::OriginalToJoinedIndexes(const TrieNode*
 }
 
 TrieNode* TrieNode::Join(const TrieNode* other) const {
-  pair<vector<int>, vector<int>> shared_attr_indexes = SharedAttributeIndexes(other);
+  vector<const TrieNode*> relations;
+  relations.push_back(this);
+  relations.push_back(other);
+  return GenericJoin(relations);
+/*  pair<vector<int>, vector<int>> shared_attr_indexes = SharedAttributeIndexes(other);
   vector<int> other_disjoint_attr_indexes = DisjointAttributeIndexes(other);
 
   unordered_map<vector<int>, vector<vector<int>>, tuple_hash> other_tuples;
@@ -387,7 +393,7 @@ TrieNode* TrieNode::Join(const TrieNode* other) const {
     }
   }
 
-  return new_relation;
+  return new_relation; */
 }
 
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {

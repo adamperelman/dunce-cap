@@ -37,8 +37,10 @@ void JoinWithChildren(BagNode* root_bag) {
 
 TrieNode* YannakakisJoin(BagNode* root_bag) {
   JoinWithinBags(root_bag);
+  cout << "starting full reducer" << endl;
   LeftSemijoinWithChildren(root_bag);
   LeftSemijoinWithParent(root_bag);
+  cout << "finished full reducer" << endl;
   JoinWithChildren(root_bag);
   return root_bag->joined.release();
 }

@@ -21,6 +21,11 @@ int main(int argc, char* argv[]) {
   root_bag->relations.push_back(TrieNode::FromFile(argv[1], {"b", "c"}));
   root_bag->relations.push_back(TrieNode::FromFile(argv[1], {"c", "d"}));
   root_bag->relations.push_back(TrieNode::FromFile(argv[1], {"d", "a"}));
+//  root_bag->relations.push_back(TrieNode::FromFile(argv[1], {"a", "e"}));
+
+  root_bag->children.push_back(unique_ptr<BagNode>(new BagNode));
+  root_bag->children[0]->relations.push_back(TrieNode::FromFile(argv[1], {"a", "e"}));
+
   cout << "loaded relations" << endl;
 
   cout << "performing join..." << endl;
