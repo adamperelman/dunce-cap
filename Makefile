@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 CFLAGS  = -g -Wall -fopenmp -std=c++0x -O3
 
 default: triangle
