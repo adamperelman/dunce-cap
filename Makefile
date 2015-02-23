@@ -1,5 +1,5 @@
-CC = clang++
-CFLAGS  = -g -Wall -std=c++0x -O3
+CC = gcc
+CFLAGS  = -g -Wall -fopenmp -std=c++0x -O3
 
 default: triangle
 

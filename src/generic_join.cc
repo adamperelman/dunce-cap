@@ -2,6 +2,11 @@
 #include <algorithm>
 #include <unordered_map>
 #include <iostream>
+#include <mutex>
+#include <map>
+#ifdef _OPENMP
+# include <omp.h>
+#endif
 
 using namespace std;
 
@@ -48,7 +53,9 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
 
   /* Pick I to be {first attribute}, J = V \ I */
   TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
-  TrieNode* result = new TrieNode(*free_attrs_begin);
+  map<int, TrieNode*> child_nodes;
+  mutex child_nodes_lock;
+  #pragma omp parallel for
   for (int val : *L->values()) {
     vector<const TrieNode*> matching_nodes;
     matching_nodes.reserve(relations.size());
@@ -60,10 +67,16 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
     }
     TrieNode* righthand_vals = GenericJoinInternal(matching_nodes, free_attrs_begin + 1, free_attrs_end);
     if (righthand_vals->size() > 0) {
-      result->AddChildNode(val, righthand_vals); // this does the cartesian product
+      lock_guard<mutex> lock(child_nodes_lock);
+      child_nodes[val] = righthand_vals; // this does the cartesian product
     } else {
       delete righthand_vals;
     }
+  }
+
+  TrieNode* result = new TrieNode(*free_attrs_begin);
+  for (pair<int, TrieNode*> val_child : child_nodes) {
+    result->AddChildNode(val_child.first, val_child.second);
   }
 
   delete L;
