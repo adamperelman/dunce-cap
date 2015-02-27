@@ -9,6 +9,7 @@ TODO:
 -parallelize generic join (and/or yannakakis) (using OpenMP?)
 
 IDEAS:
+-instead of having each node store its values separately, have the first list of values point to locations in a second list of values; this should improve caching when we stream over all tuples
 -iterator for TrieNode should take as an optional argument the set of attributes you're interested in
 -there are better ways to implement left semi join
 
