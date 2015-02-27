@@ -337,6 +337,14 @@ pair<vector<int>, vector<int>> TrieNode::OriginalToJoinedIndexes(const TrieNode*
   return result;
 }
 
+TrieNode* TrieNode::PairwiseJoin(const TrieNode* r1,
+                                 const TrieNode* r2) {
+  vector<const TrieNode*> relations;
+  relations.push_back(r1);
+  relations.push_back(r2);
+  return GenericJoin(relations);
+}
+
 TrieNode* TrieNode::Join(const TrieNode* other) const {
   vector<const TrieNode*> relations;
   relations.push_back(this);

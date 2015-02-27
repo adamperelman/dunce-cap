@@ -27,6 +27,9 @@ triangle: triangle.o relation.o generic_join.o
 tadpole: tadpole.o relation.o yannakakis.o generic_join.o
 	$(CC) $(CFLAGS) tadpole.o relation.o generic_join.o yannakakis.o -o tadpole.exe
 
+pairwise: pairwise.o relation.o generic_join.o
+	$(CC) $(CFLAGS) pairwise.o relation.o generic_join.o -o pairwise.exe
+
 lollipop: lollipop.o relation.o yannakakis.o generic_join.o
 	$(CC) $(CFLAGS) lollipop.o relation.o generic_join.o yannakakis.o -o lollipop.exe
 
@@ -35,6 +38,9 @@ triangle.o: src/triangle.cc
 
 tadpole.o: src/tadpole.cc
 	$(CC) $(CFLAGS) -c src/tadpole.cc
+
+pairwise.o: src/pairwise.cc
+	$(CC) $(CFLAGS) -c src/pairwise.cc
 
 lollipop.o: src/lollipop.cc
 	$(CC) $(CFLAGS) -c src/lollipop.cc

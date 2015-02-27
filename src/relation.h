@@ -17,6 +17,9 @@ public:
 
   static TrieNode* FromFile(const std::string& filename, std::vector<std::string> attrs);
 
+  static TrieNode* PairwiseJoin(const TrieNode* r1,
+                                const TrieNode* r2);
+
   bool ContainsAttribute(const std::string& attr) const;
 
   std::vector<std::string> attrs() const;
