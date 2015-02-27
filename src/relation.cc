@@ -14,7 +14,7 @@
 using namespace std;
 
 struct tuple_hash {
-  size_t operator()(const std::vector<int>& tuple) const {
+  int operator()(const std::vector<int>& tuple) const {
     return boost::hash_range(tuple.begin(), tuple.end());
   }
 };
@@ -254,7 +254,7 @@ TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
   vector<int> buffer(shared_attr_indexes.first.size());
 
   for (TrieNode::const_iterator it = other->begin(); it != other->end(); ++it) {
-    for(int i=0; i<buffer.size(); ++i) {
+    for (int i = 0; i<buffer.size(); ++i) {
       buffer[i] = it->at(shared_attr_indexes.second.at(i));
     }
     other_tuples.insert(buffer);
@@ -264,7 +264,7 @@ TrieNode* TrieNode::LeftSemijoin(const TrieNode* other) const {
   vector<string> this_attrs = attrs();
 
   for (TrieNode::const_iterator it = begin(); it != end(); ++it) {
-     for(int i=0; i<buffer.size(); ++i) {
+     for (int i=0; i<buffer.size(); ++i) {
       buffer[i] = it->at(shared_attr_indexes.first.at(i));
     }
     if (other_tuples.count(buffer)) {
@@ -290,7 +290,7 @@ vector<int> TrieNode::DisjointAttributeIndexes(const TrieNode* other) const {
   vector<string> other_attrs = other->attrs();
   vector<string> this_attrs = attrs();
   vector<int> result;
-  for(int i=0; i < other_attrs.size(); ++i) {
+  for (int i=0; i < other_attrs.size(); ++i) {
     if (!binary_search(this_attrs.begin(), this_attrs.end(), other_attrs[i])) {
       result.push_back(i);
     }

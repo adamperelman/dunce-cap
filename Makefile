@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS  = -g -Wall -fopenmp -std=c++0x -O3
+CFLAGS  = -g -Wall -fopenmp -std=c++0x -O3 -Wno-sign-compare
 
 default: triangle
 
