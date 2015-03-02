@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS  = -g -Wall -fopenmp -std=c++0x -O3 -Wno-sign-compare
+CFLAGS  = -g -Wall -fopenmp -std=c++0x -O0 -Wno-sign-compare
 
 default: triangle
 
@@ -33,6 +33,9 @@ pairwise: pairwise.o relation.o generic_join.o
 lollipop: lollipop.o relation.o yannakakis.o generic_join.o
 	$(CC) $(CFLAGS) lollipop.o relation.o generic_join.o yannakakis.o -o lollipop.exe
 
+run_plan: run_plan.o relation.o  yannakakis.o generic_join.o
+	$(CC) $(CFLAGS) run_plan.o relation.o generic_join.o yannakakis.o -o run_plan.exe
+
 triangle.o: src/triangle.cc
 	$(CC) $(CFLAGS) -c src/triangle.cc
 
@@ -44,6 +47,9 @@ pairwise.o: src/pairwise.cc
 
 lollipop.o: src/lollipop.cc
 	$(CC) $(CFLAGS) -c src/lollipop.cc
+
+run_plan.o: src/run_plan.cc
+	$(CC) $(CFLAGS) -c src/run_plan.cc
 
 generic_join.o: src/generic_join.h src/generic_join.cc
 	$(CC) $(CFLAGS) -c src/generic_join.cc

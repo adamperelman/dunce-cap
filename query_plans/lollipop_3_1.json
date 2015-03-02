@@ -1,0 +1,17 @@
+// Root node of the hypertree decomposition.
+{
+    // Relations within this bag.
+    "relations": [
+        { "attrs": ["a", "b"] },
+        { "attrs": ["b", "c"] },
+        { "attrs": ["c", "a"] }
+    ],
+    "children": [
+        // Child node.
+        {
+            "relations": [
+                { "attrs": ["a", "d"] }
+            ]
+        }
+    ]
+}

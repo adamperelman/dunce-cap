@@ -8,6 +8,7 @@ TODO:
 -think about what the theory says about how GenericJoin should behave on a pairwise join (before/after running a full reducer)
 -parallelize generic join (and/or yannakakis) (using OpenMP?)
 -write a script to read a query plan (tree decomp?) from a JSON file
+-write a "query compiler" to produce a tree decomp
 
 IDEAS:
 -instead of having each node store its values separately, have the first list of values point to locations in a second list of values; this should improve caching when we stream over all tuples
