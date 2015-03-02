@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <memory>
 #include <unordered_map>
-#include <stdexcept>
 
 #include "relation.h"
 #include "generic_join.h"

@@ -52,30 +52,25 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
   }
 
   /* Pick I to be {first attribute}, J = V \ I */
-  const TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
+  TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
   map<int, TrieNode*> child_nodes;
   mutex child_nodes_lock;
-  #pragma omp parallel num_threads(8)
-  {
-    #pragma omp for
-    for (int i = 0; i < L->values()->size(); ++i) {
-      int val = L->values()->at(i);
-      vector<const TrieNode*> matching_nodes;
-      matching_nodes.reserve(relations.size());
-      for (const TrieNode* rel : relations) {
-        const TrieNode* matching = rel->MatchingNode(*free_attrs_begin, val);
-        if (matching) {
-          matching_nodes.push_back(matching);
-        }
+  #pragma omp parallel for
+  for (int val : *L->values()) {
+    vector<const TrieNode*> matching_nodes;
+    matching_nodes.reserve(relations.size());
+    for (const TrieNode* rel : relations) {
+      const TrieNode* matching = rel->MatchingNode(*free_attrs_begin, val);
+      if (matching) {
+        matching_nodes.push_back(matching);
       }
-      TrieNode* righthand_vals = GenericJoinInternal(matching_nodes, free_attrs_begin + 1, free_attrs_end);
-      if (righthand_vals->size() > 0) {
-        lock_guard<mutex> lock(child_nodes_lock);
-        child_nodes[val] = righthand_vals; // this does the cartesian product
-        #pragma omp flush(child_nodes)
-      } else {
-        delete righthand_vals;
-      }
+    }
+    TrieNode* righthand_vals = GenericJoinInternal(matching_nodes, free_attrs_begin + 1, free_attrs_end);
+    if (righthand_vals->size() > 0) {
+      lock_guard<mutex> lock(child_nodes_lock);
+      child_nodes[val] = righthand_vals; // this does the cartesian product
+    } else {
+      delete righthand_vals;
     }
   }
 
