@@ -2,12 +2,13 @@
     "relations": [
         { "attrs": ["a", "b"] },
         { "attrs": ["b", "c"] },
-        { "attrs": ["c", "a"] }
+        { "attrs": ["c", "d"] },
+        { "attrs": ["d", "a"] }
     ],
     "children": [
         {
             "relations": [
-                { "attrs": ["a", "d"] }
+                { "attrs": ["a", "e"] }
             ]
         }
     ]

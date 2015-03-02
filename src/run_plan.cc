@@ -2,13 +2,32 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
-#include <include/picojson.h>
+#include "../include/picojson.h"
 
 #include "relation.h"
 #include "yannakakis.h"
 #include "generic_join.h"
 
 using namespace std;
+
+BagNode* BuildPlanSubtree(picojson::value v, string data_file) {
+  cout << v.get("relations") << endl;
+  BagNode* bag_node = new BagNode();
+  for (const picojson::value& rel: v.get("relations").get<picojson::array>()) {
+    vector<string> attrs;
+    for (const picojson::value& attr : rel.get("attrs").get<picojson::array>()) {
+      attrs.push_back(attr.get<string>());
+    }
+    bag_node->relations.push_back(TrieNode::FromFile(data_file, attrs));
+  }
+  const picojson::value& children = v.get("children");
+  if (children.is<picojson::array>()) {
+    for (const picojson::value& child: children.get<picojson::array>()) {
+      bag_node->children.push_back(unique_ptr<BagNode>(BuildPlanSubtree(child, data_file)));
+    }
+  }
+  return bag_node;
+}
 
 BagNode* BuildPlanTree(string plan_file, string data_file) {
   picojson::value v;
@@ -18,7 +37,7 @@ BagNode* BuildPlanTree(string plan_file, string data_file) {
     cerr << "error parsing json" << endl;
     exit(1);
   }
-  return NULL;
+  return BuildPlanSubtree(v, data_file);
 }
 
 int main(int argc, char* argv[]) {
