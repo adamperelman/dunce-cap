@@ -24,14 +24,8 @@ yannakakis_test.o: test/yannakakis_test.cc
 triangle: triangle.o relation.o generic_join.o
 	$(CC) $(CFLAGS) triangle.o relation.o generic_join.o -o triangle.exe
 
-tadpole: tadpole.o relation.o yannakakis.o generic_join.o
-	$(CC) $(CFLAGS) tadpole.o relation.o generic_join.o yannakakis.o -o tadpole.exe
-
 pairwise: pairwise.o relation.o generic_join.o
 	$(CC) $(CFLAGS) pairwise.o relation.o generic_join.o -o pairwise.exe
-
-lollipop: lollipop.o relation.o yannakakis.o generic_join.o
-	$(CC) $(CFLAGS) lollipop.o relation.o generic_join.o yannakakis.o -o lollipop.exe
 
 run_plan: run_plan.o relation.o  yannakakis.o generic_join.o
 	$(CC) $(CFLAGS) run_plan.o relation.o generic_join.o yannakakis.o -o run_plan.exe
@@ -39,14 +33,8 @@ run_plan: run_plan.o relation.o  yannakakis.o generic_join.o
 triangle.o: src/triangle.cc
 	$(CC) $(CFLAGS) -c src/triangle.cc
 
-tadpole.o: src/tadpole.cc
-	$(CC) $(CFLAGS) -c src/tadpole.cc
-
 pairwise.o: src/pairwise.cc
 	$(CC) $(CFLAGS) -c src/pairwise.cc
-
-lollipop.o: src/lollipop.cc
-	$(CC) $(CFLAGS) -c src/lollipop.cc
 
 run_plan.o: src/run_plan.cc
 	$(CC) $(CFLAGS) -c src/run_plan.cc

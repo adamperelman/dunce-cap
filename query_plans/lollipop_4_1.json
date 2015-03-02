@@ -1,0 +1,17 @@
+{
+    "relations": [
+        { "attrs": ["a", "b"] },
+        { "attrs": ["b", "c"] },
+        { "attrs": ["c", "d"] },
+        { "attrs": ["d", "a"] },
+        { "attrs": ["a", "c"] },
+        { "attrs": ["b", "d"] }
+    ],
+    "children": [
+        {
+            "relations": [
+                { "attrs": ["a", "e"] }
+            ]
+        }
+    ]
+}
