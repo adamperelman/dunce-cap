@@ -133,10 +133,11 @@ const TrieNode* TrieNode::MatchingNode(const std::string& attr, int val) const {
 
   // We're binding this node's attribute now, so we only want a subset of our values.
   auto val_ptr = lower_bound(values_->begin(), values_->end(), val);
-  if (val_ptr == values_->end() || *val_ptr != val) {
-    // We don't have a matching value.
-    return nullptr;
-  }
+
+  // If we're searching for a matching node, that implies that
+  // this value must have been in the intersection of values
+  // for this attribute, so it must be present.
+  assert(*val_ptr == val);
 
   int index = val_ptr - values_->begin();
   return children_[index].get();

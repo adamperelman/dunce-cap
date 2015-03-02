@@ -4,9 +4,6 @@
 #include <iostream>
 #include <mutex>
 #include <map>
-#ifdef _OPENMP
-# include <omp.h>
-#endif
 
 using namespace std;
 

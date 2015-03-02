@@ -7,7 +7,6 @@ TODO:
 -implement yannakakis with these faster pairwise join algorithms
 -think about what the theory says about how GenericJoin should behave on a pairwise join (before/after running a full reducer)
 -parallelize generic join (and/or yannakakis) (using OpenMP?)
--write a script to read a query plan (tree decomp?) from a JSON file
 -write a "query compiler" to produce a tree decomp
 
 IDEAS:
