@@ -1,3 +1,6 @@
+import argparse
+import json
+
 RELATIONS = [
   ["A", "B"],
   ["B", "C"],
@@ -25,8 +28,8 @@ def bucket_assignments():
 
 class Node(object):
   def __init__(self, relations):
-    self.relations = relations
-    self.attrs = set(a for rel in self.relations for a in RELATIONS[rel])
+    self.relations = [RELATIONS[rel] for rel in relations]
+    self.attrs = set(a for rel in self.relations for a in rel)
     self.neighbors = []
 
 def build_tree(buckets):
@@ -39,23 +42,21 @@ def build_tree(buckets):
 
   return nodes
 
-def check_for_cycle(node, visited):
+def check_for_cycle(node, visited, prev_node):
   if node in visited:
     return True
 
   visited.add(node)
 
-  for neighbor in node.neighbors:
-    if check_for_cycle(neighbor, visited):
-      return True
-
-  return False
+  return any(check_for_cycle(n, visited, node)
+             for n in node.neighbors
+             if n is not prev_node)
 
 def is_tree(nodes):
   visited = set()
   for node in nodes:
     if node not in visited:
-      if check_for_cycle(node, visited):
+      if check_for_cycle(node, visited, None):
         return False
   return True
 
@@ -63,19 +64,58 @@ def is_tree(nodes):
 def tree_width(nodes):
   return max(len(n.attrs)-1 for n in nodes)
 
+def make_json(node, visited):
+  visited.add(node)
+
+  result = {}
+  result['relations'] = [{'attrs': rel}
+                         for rel in node.relations]
+
+  if any(n not in visited for n in node.neighbors):
+    result['children'] = [make_json(n, visited)
+                          for n in node.neighbors
+                          if n not in visited]
+
+  return result
+
+def write_tree(nodes, outfile):
+  # TODO: assumes graph is connected
+  json_data = make_json(nodes[0], set())
+  with open(outfile, 'w') as f:
+    json.dump(json_data, f, indent=4, separators=(',', ': '))
+
+def print_tree(node, visited=set()):
+  if node in visited:
+    return
+
+  visited.add(node)
+  print node.relations
+  print node.attrs
+  print 'neighbors:', [n.relations for n in node.neighbors]
+  print
+  for n in node.neighbors:
+    print_tree(n, visited)
+
 def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('outfile', help='output file')
+  args = parser.parse_args()
+
   best_tree = None
   best_width = float('inf')
   for buckets in bucket_assignments():
     tree = build_tree(buckets)
-    if is_tree(tree):
-      width = tree_width(tree)
-      if width < best_width:
-        best_tree = tree
-        best_width = width
+    if not is_tree(tree):
+      continue
+    # TODO do we need to check any other conditions
+    # to make sure this is a valid hypertree decomp?
+    width = tree_width(tree)
+    if width < best_width:
+      best_tree = tree
+      best_width = width
 
-
-  print best_tree
+  print_tree(best_tree[0])
+  write_tree(best_tree, args.outfile)
 
 if __name__ == "__main__":
   main()
