@@ -6,6 +6,7 @@ RELATIONS = [
   ["B", "C"],
   ["C", "A"],
   ["A", "D"],
+  ["D", "E"]
 ]
 
 # Yield all distinct assignments of relations to bags.
@@ -62,7 +63,9 @@ def is_tree(nodes):
 
 
 def tree_width(nodes):
-  return max(len(n.attrs)-1 for n in nodes)
+  bag_widths = [len(n.attrs) - 1 for n in nodes]
+  width = max(bag_widths)
+  return width, bag_widths.count(width)
 
 def make_json(node, visited):
   visited.add(node)
@@ -102,17 +105,18 @@ def main():
   args = parser.parse_args()
 
   best_tree = None
-  best_width = float('inf')
+  best_width, best_count = float('inf'), float('inf')
   for buckets in bucket_assignments():
     tree = build_tree(buckets)
     if not is_tree(tree):
       continue
     # TODO do we need to check any other conditions
     # to make sure this is a valid hypertree decomp?
-    width = tree_width(tree)
-    if width < best_width:
+    width, count = tree_width(tree)
+    if width < best_width or width == best_width and count < best_count:
       best_tree = tree
       best_width = width
+      best_count = count
 
   print_tree(best_tree[0])
   write_tree(best_tree, args.outfile)
