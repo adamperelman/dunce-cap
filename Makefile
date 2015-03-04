@@ -49,4 +49,4 @@ relation.o: src/relation.cc
 	$(CC) $(CFLAGS) -c src/relation.cc
 
 clean:
-	$(RM) *.o *~ *.exe
+	$(RM) -r *.o *~ *.exe *.exe.dSYM
