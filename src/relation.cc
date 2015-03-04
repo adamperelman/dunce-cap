@@ -317,6 +317,32 @@ TrieNode* TrieNode::PairwiseJoin(const TrieNode* r1,
   return GenericJoin(relations);
 }
 
+int TrieNode::PairwiseCount(const TrieNode* parent,
+                            const TrieNode* child) {
+  // TODO: currently assumes only 1 attribute is shared
+  // TODO: currently assumes the join attribute is the first
+  //       attribute of each relation
+  int count = 0;
+
+  int parent_i = 0;
+  int child_i = 0;
+  while (parent_i < parent->values_->size() &&
+         child_i < child->values_->size()) {
+    int parent_val = parent->values_->at(parent_i);
+    int child_val = child->values_->at(child_i);
+    if (parent_val == child_val) {
+      count += (parent->children_.at(parent_i++)->size()
+                * child->children_.at(child_i++)->size());
+    } else if (parent_val < child_val) {
+      parent_i++;
+    } else {
+      child_i++;
+    }
+  }
+
+  return count;
+}
+
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {
   const TrieNode* current_node = root;
   while (current_node) {

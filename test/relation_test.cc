@@ -94,3 +94,11 @@ TEST_CASE("pairwise join works") {
   vector<string> expected_attrs = {"a", "b", "c", "d", "e"};
   REQUIRE(result->attrs() == expected_attrs);
 }
+
+TEST_CASE("simple pairwise count works") {
+  TrieNode* a = TrieNode::FromFile("data/joincount_test1.txt", {"a", "b"});
+  TrieNode* b = TrieNode::FromFile("data/joincount_test2.txt", {"a", "b"});
+
+  int result = TrieNode::PairwiseCount(a, b);
+  REQUIRE(result == 6);
+}
