@@ -86,13 +86,11 @@ TEST_CASE("pairwise join works") {
   TrieNode* a = TrieNode::FromFile("data/semijoin_test1.txt", {"a", "b", "d"});
   TrieNode* b = TrieNode::FromFile("data/semijoin_test2.txt", {"b", "c", "d", "e"});
 
-  for (TrieNode* result: {a->Join(b), b->Join(a)}) {
-    REQUIRE(result->size() == 2);
-    REQUIRE(result->contains({7, 8, 100, 9, 18}));
-    REQUIRE(result->contains({10, 11, 32, 12, 101}));
+  TrieNode* result = TrieNode::PairwiseJoin(a, b);
+  REQUIRE(result->size() == 2);
+  REQUIRE(result->contains({7, 8, 100, 9, 18}));
+  REQUIRE(result->contains({10, 11, 32, 12, 101}));
 
-    vector<string> expected_attrs = {"a", "b", "c", "d", "e"};
-    REQUIRE(result->attrs() == expected_attrs);
-  }
+  vector<string> expected_attrs = {"a", "b", "c", "d", "e"};
+  REQUIRE(result->attrs() == expected_attrs);
 }
-
