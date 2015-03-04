@@ -43,7 +43,6 @@ int CountWithChildren(BagNode* root_bag) {
 }
 
 void FullReducer(BagNode* root_bag) {
-  JoinWithinBags(root_bag);
   cout << "starting full reducer..." << endl;
   LeftSemijoinWithChildren(root_bag);
   LeftSemijoinWithParent(root_bag);
@@ -51,12 +50,14 @@ void FullReducer(BagNode* root_bag) {
 }
 
 TrieNode* YannakakisJoin(BagNode* root_bag) {
+  JoinWithinBags(root_bag);
   FullReducer(root_bag);
   JoinWithChildren(root_bag);
   return root_bag->joined.release();
 }
 
 int YannakakisCount(BagNode* root_bag) {
-  FullReducer(root_bag);
+  // TODO: only works for 2 bag case right now
+  JoinWithinBags(root_bag);
   return CountWithChildren(root_bag);
 }
