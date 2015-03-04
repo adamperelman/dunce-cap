@@ -1,7 +1,7 @@
 CC = g++
-CFLAGS  = -g -Wall -std=c++0x -O3 -Wno-sign-compare
+CFLAGS  = -g -Wall -std=c++0x -Wno-sign-compare -O3
 
-default: triangle
+default: run_plan
 
 relation_test: relation_test.o relation.o
 	$(CC) $(CFLAGS) relation_test.o relation.o -o relation_test.exe

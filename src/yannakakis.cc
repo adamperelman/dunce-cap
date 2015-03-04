@@ -30,17 +30,22 @@ void LeftSemijoinWithParent(BagNode* root_bag) {
 void JoinWithChildren(BagNode* root_bag) {
   for (const auto& child : root_bag->children) {
     JoinWithChildren(child.get());
-    TrieNode* new_joined = root_bag->joined->Join(child->joined.get());
+    TrieNode* new_joined = TrieNode::PairwiseJoin(root_bag->joined.get(),
+                                                  child->joined.get());
     root_bag->joined.reset(new_joined);
   }
 }
 
-TrieNode* YannakakisJoin(BagNode* root_bag) {
+void FullReducer(BagNode* root_bag) {
   JoinWithinBags(root_bag);
-  cout << "starting full reducer" << endl;
+  cout << "starting full reducer..." << endl;
   LeftSemijoinWithChildren(root_bag);
   LeftSemijoinWithParent(root_bag);
   cout << "finished full reducer" << endl;
+}
+
+TrieNode* YannakakisJoin(BagNode* root_bag) {
+  FullReducer(root_bag);
   JoinWithChildren(root_bag);
   return root_bag->joined.release();
 }
