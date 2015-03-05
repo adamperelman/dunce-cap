@@ -36,6 +36,20 @@ vector<int>* Intersection(vector<const vector<int>*>& ordered_sets) {
   return new vector<int>(scratch_space[(ordered_sets.size()+1) % 2]);
 }
 
+inline vector<const vector<int>*> MatchingRelationsForAttr(vector<const TrieNode*>& relations,
+                                                           const string& attr) {
+  vector<const vector<int>*> matching_relations;
+  matching_relations.reserve(relations.size());
+  for (const TrieNode* rel : relations) {
+    // Note that if this relation contains the given target attribute,
+    // it must be the node's own attribute (i.e. not the attribute of one
+    // of its children), since we've already bound all previous attributes.
+    if (rel->attr() == attr) {
+      matching_relations.push_back(rel->values());
+    }
+  }
+  return matching_relations;
+}
 
 // TODO: should we be passing a reference to free_attrs and bound_attrs
 // instead of making copies?
@@ -43,16 +57,8 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
                               vector<string>::iterator free_attrs_begin,
                               vector<string>::iterator free_attrs_end) {
   if (free_attrs_begin + 1 == free_attrs_end) {
-    vector<const vector<int>*> matching_relations;
-    matching_relations.reserve(relations.size());
-    for (const TrieNode* rel : relations) {
-      // Note that if this relation contains the given target attribute,
-      // it must be the node's own attribute (i.e. not the attribute of one
-      // of its children), since we've already bound all previous attributes.
-      if (rel->attr() == *free_attrs_begin) {
-        matching_relations.push_back(rel->values());
-      }
-    }
+    vector<const vector<int>*> matching_relations = MatchingRelationsForAttr(relations,
+                                                                             *free_attrs_begin);
     return new TrieNode(*free_attrs_begin, Intersection(matching_relations));
   }
 
@@ -85,16 +91,8 @@ int GenericJoinCountInternal(vector<const TrieNode*>& relations,
                              vector<string>::iterator free_attrs_begin,
                              vector<string>::iterator free_attrs_end) {
   if (free_attrs_begin + 1 == free_attrs_end) {
-    vector<const vector<int>*> matching_relations;
-    matching_relations.reserve(relations.size());
-    for (const TrieNode* rel : relations) {
-      // Note that if this relation contains the given target attribute,
-      // it must be the node's own attribute (i.e. not the attribute of one
-      // of its children), since we've already bound all previous attributes.
-      if (rel->attr() == *free_attrs_begin) {
-        matching_relations.push_back(rel->values());
-      }
-    }
+    vector<const vector<int>*> matching_relations = MatchingRelationsForAttr(relations,
+                                                                             *free_attrs_begin);
     vector<int>* intersection = Intersection(matching_relations);
     int result = intersection->size();
     delete intersection;
