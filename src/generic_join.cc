@@ -81,8 +81,7 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
 }
 
 
-TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
-
+vector<string> OrderedAttrs(vector<const TrieNode*>& relations) {
   set<string> attrs;
   for (const TrieNode* r : relations) {
     for (const string& attr : r->attrs()) {
@@ -91,6 +90,10 @@ TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
   }
 
   vector<string> ordered_attrs(attrs.begin(), attrs.end());
+  return ordered_attrs;
+}
 
+TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
+  vector<string> ordered_attrs = OrderedAttrs(relations);
   return GenericJoinInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
 }
