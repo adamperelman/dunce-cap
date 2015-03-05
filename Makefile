@@ -1,10 +1,10 @@
 CC = g++
-CFLAGS  = -g -Wall -std=c++0x -O3 -Wno-sign-compare
+CFLAGS  = -g -Wall -std=c++0x -Wno-sign-compare -O3
 
-default: triangle
+default: run_plan
 
-relation_test: relation_test.o relation.o
-	$(CC) $(CFLAGS) relation_test.o relation.o -o relation_test.exe
+relation_test: relation_test.o relation.o generic_join.o
+	$(CC) $(CFLAGS) relation_test.o relation.o generic_join.o -o relation_test.exe
 
 generic_join_test: generic_join_test.o relation.o generic_join.o
 	$(CC) $(CFLAGS) generic_join_test.o relation.o generic_join.o -o generic_join_test.exe
@@ -49,4 +49,4 @@ relation.o: src/relation.cc
 	$(CC) $(CFLAGS) -c src/relation.cc
 
 clean:
-	$(RM) *.o *~ *.exe
+	$(RM) -r *.o *~ *.exe *.exe.dSYM

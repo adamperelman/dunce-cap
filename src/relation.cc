@@ -54,18 +54,6 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
   return root;
 }
 
-bool TrieNode::ContainsAttribute(const string& attr) const {
-  if (attr_ == attr) {
-    return true;
-  }
-
-  if (children_.empty() || !children_[0]) {
-    return false;
-  }
-
-  return children_[0]->ContainsAttribute(attr);
-}
-
 vector<string> TrieNode::attrs() const {
   if (children_.empty() || !children_[0]) {
     return vector<string>({attr_});
@@ -83,8 +71,10 @@ ostream& operator<<(ostream& os, const TrieNode& rel) {
 
   cout << endl;
 
-  for (const vector<int>& tuple : rel.MakeTuples()) {
-    for (int val : tuple) {
+  for (TrieNode::const_iterator it = rel.begin();
+       it != rel.end();
+       ++it) {
+    for (int val : *it) {
       cout << val << "\t";
     }
     cout << endl;
@@ -93,24 +83,6 @@ ostream& operator<<(ostream& os, const TrieNode& rel) {
   return os;
 }
 
-vector<vector<int>> TrieNode::MakeTuples() const {
-  vector<vector<int>> tuples;
-
-  for (int i = 0; i < values_->size(); i++) {
-    int val = values_->at(i);
-    const unique_ptr<TrieNode>& child_ptr = children_[i];
-    if (!child_ptr) {
-      tuples.push_back(vector<int>({val}));
-    } else {
-      for (vector<int> t : child_ptr->MakeTuples()) {
-        t.insert(t.begin(), val);
-        tuples.push_back(t);
-      }
-    }
-  }
-
-  return tuples;
-}
 
 int TrieNode::size() const {
   int result = 0;
@@ -345,64 +317,30 @@ TrieNode* TrieNode::PairwiseJoin(const TrieNode* r1,
   return GenericJoin(relations);
 }
 
-TrieNode* TrieNode::Join(const TrieNode* other) const {
-  vector<const TrieNode*> relations;
-  relations.push_back(this);
-  relations.push_back(other);
-  return GenericJoin(relations);
-/*  pair<vector<int>, vector<int>> shared_attr_indexes = SharedAttributeIndexes(other);
-  vector<int> other_disjoint_attr_indexes = DisjointAttributeIndexes(other);
+int TrieNode::PairwiseCount(const TrieNode* parent,
+                            const TrieNode* child) {
+  // TODO: currently assumes only 1 attribute is shared
+  // TODO: currently assumes the join attribute is the first
+  //       attribute of each relation
+  int count = 0;
 
-  unordered_map<vector<int>, vector<vector<int>>, tuple_hash> other_tuples;
-
-  vector<int> key_buffer(shared_attr_indexes.first.size());
-  vector<int> val_buffer(other_disjoint_attr_indexes.size());
-
-  for (TrieNode::const_iterator it = other->begin();
-       it != other->end();
-       ++it) {
-    for(int i = 0; i < key_buffer.size(); ++i) {
-      key_buffer[i] = it->at(shared_attr_indexes.second.at(i));
-    }
-    for (int i = 0; i < val_buffer.size(); ++i) {
-      val_buffer[i] = it->at(other_disjoint_attr_indexes.at(i));
-    }
-    other_tuples[key_buffer].push_back(val_buffer);
-  }
-
-  vector<string> joined_attrs = JoinedAttributes(other);
-  vector<int> joined_tuple_buffer = vector<int>(joined_attrs.size());
-  pair<vector<int>, vector<int>> orig_to_joined_indexes = OriginalToJoinedIndexes(other);
-
-  TrieNode* new_relation = new TrieNode(joined_attrs[0]);
-
-  for (TrieNode::const_iterator it = begin(); it != end(); ++it) {
-    for (int i = 0; i < key_buffer.size(); ++i) {
-      key_buffer[i] = it->at(shared_attr_indexes.first.at(i));
-    }
-    if (other_tuples.count(key_buffer)) {
-      // Set the values in our buffer that come from this relation's tuple.
-      for (int i = 0; i < it->size(); ++i) {
-        joined_tuple_buffer[orig_to_joined_indexes.first[i]] = it->at(i);
-      }
-      for (const vector<int>& matching_tuple : other_tuples[key_buffer]) {
-        // Set the values in our buffer that come from the other relation's tuple.
-        for (int i = 0; i < other_disjoint_attr_indexes.size(); ++i) {
-          int orig_index = other_disjoint_attr_indexes[i];
-          int joined_index = orig_to_joined_indexes.second[orig_index];
-          joined_tuple_buffer[joined_index] = matching_tuple[i];
-        }
-
-        // TODO: InsertTuple is slow!
-        new_relation->InsertTuple(joined_tuple_buffer.begin(),
-                                  joined_tuple_buffer.end(),
-                                  joined_attrs.begin(),
-                                  joined_attrs.end());
-      }
+  int parent_i = 0;
+  int child_i = 0;
+  while (parent_i < parent->values_->size() &&
+         child_i < child->values_->size()) {
+    int parent_val = parent->values_->at(parent_i);
+    int child_val = child->values_->at(child_i);
+    if (parent_val == child_val) {
+      count += (parent->children_.at(parent_i++)->size()
+                * child->children_.at(child_i++)->size());
+    } else if (parent_val < child_val) {
+      parent_i++;
+    } else {
+      child_i++;
     }
   }
 
-  return new_relation; */
+  return count;
 }
 
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {

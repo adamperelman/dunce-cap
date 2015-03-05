@@ -5,8 +5,15 @@ struct BagNode {
   std::vector<std::unique_ptr<BagNode>> children;
   std::vector<const TrieNode*> relations;
   std::unique_ptr<TrieNode> joined;
+
+  ~BagNode() {
+    for (const TrieNode* rel : relations) {
+      delete rel;
+    }
+  }
 };
 
 TrieNode* YannakakisJoin(BagNode* root_bag);
+int YannakakisCount(BagNode* root_bag);
 
 #endif

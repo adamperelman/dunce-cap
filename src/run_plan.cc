@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  BagNode* root_bag = BuildPlanTree(argv[1], argv[2]);
+  unique_ptr<BagNode> root_bag(BuildPlanTree(argv[1], argv[2]));
 
   cout << "done building plan tree" << endl;
 
@@ -55,15 +55,12 @@ int main(int argc, char* argv[]) {
   typedef chrono::milliseconds ms;
 
   Clock::time_point start_join = Clock::now();
-  TrieNode* result = YannakakisJoin(root_bag);
+  int result = YannakakisCount(root_bag.get());
   Clock::time_point end_join = Clock::now();
 
   cout << "done performing join" << endl;
   ms join_time = chrono::duration_cast<ms>(end_join - start_join);
 
   cout << join_time.count() << "ms\n" << endl;
-  cout << "size: " << result->size() << endl;
-
-  delete result;
-  delete root_bag;
+  cout << "size: " << result << endl;
 }

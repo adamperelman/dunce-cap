@@ -20,7 +20,8 @@ public:
   static TrieNode* PairwiseJoin(const TrieNode* r1,
                                 const TrieNode* r2);
 
-  bool ContainsAttribute(const std::string& attr) const;
+  static int PairwiseCount(const TrieNode* parent,
+                           const TrieNode* child);
 
   std::vector<std::string> attrs() const;
 
@@ -33,8 +34,6 @@ public:
                    std::vector<int>::const_iterator tuple_end,
                    std::vector<std::string>::const_iterator attr_start,
                    std::vector<std::string>::const_iterator attr_end);
-
-  std::vector<std::vector<int>> MakeTuples() const;
 
   int size() const; // TODO change this to cache size in each trienode
   bool contains(const std::vector<int>& tuple) const;
@@ -50,11 +49,11 @@ public:
 
   std::pair<std::vector<int>, std::vector<int>> OriginalToJoinedIndexes(const TrieNode* other) const;
   std::vector<int> DisjointAttributeIndexes(const TrieNode* other) const;
-  std::vector<std::string> JoinedAttributes(const TrieNode* other) const;
-  TrieNode* LeftSemijoin(const TrieNode* other) const;
-  TrieNode* Join(const TrieNode* other) const;
-
   std::pair<std::vector<int>, std::vector<int>> SharedAttributeIndexes(const TrieNode* other) const;
+  std::vector<std::string> JoinedAttributes(const TrieNode* other) const;
+
+  TrieNode* LeftSemijoin(const TrieNode* other) const;
+
   class const_iterator {
   public:
     const_iterator(const TrieNode* root);

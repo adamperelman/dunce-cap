@@ -13,3 +13,8 @@
 341766305 lollipops (4-clique with tail of length1)
 *sqlite: 11m 45s
 *Y with pairwise performed by GJ: 17s
+
+
+***FACEBOOK DATASET***
+720112032 4-cliques
+*Y with pairwise count: 35968ms
