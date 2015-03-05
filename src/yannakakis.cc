@@ -57,12 +57,11 @@ TrieNode* YannakakisJoin(BagNode* root_bag) {
 }
 
 int YannakakisCount(BagNode* root_bag) {
-  // TODO: only works for 2 bag case right now
-  JoinWithinBags(root_bag);
-
+  // TODO: only works for 1 or 2 bag case right now
   if (root_bag->children.empty()) {
-    return root_bag->joined->size();
+    return GenericJoinCount(root_bag->relations);
   }
 
+  JoinWithinBags(root_bag);
   return CountWithChildren(root_bag);
 }

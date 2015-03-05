@@ -6,5 +6,6 @@
 #include <memory>
 
 TrieNode* GenericJoin(std::vector<const TrieNode*>& relations);
+int GenericJoinCount(std::vector<const TrieNode*>& relations);
 
 #endif /* __DATABASE_H__ */
