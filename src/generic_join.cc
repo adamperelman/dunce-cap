@@ -13,19 +13,27 @@ bool vectorLengthCmp(const vector<int>* a, const vector<int>* b) {
 
 // TODO: replace with better algorithm (e.g. EmptyHeaded)
 vector<int>* Intersection(vector<const vector<int>*>& ordered_sets) {
-  sort(ordered_sets.begin(), ordered_sets.end(), vectorLengthCmp);
-  vector<int>* intersection = new vector<int>(*ordered_sets[0]);
-  for (int i = 1; i < ordered_sets.size(); i++) {
-    vector<int>* temp = new vector<int>();
-    temp->reserve(intersection->size());
-    set_intersection(intersection->begin(), intersection->end(),
-                     ordered_sets.at(i)->begin(), ordered_sets.at(i)->end(),
-                     inserter(*temp, temp->begin()));
-    delete intersection;
-    intersection = temp;
+  if (ordered_sets.size() == 1) {
+    return new vector<int>(*ordered_sets[0]);
   }
 
-  return intersection;
+  sort(ordered_sets.begin(), ordered_sets.end(), vectorLengthCmp);
+
+  vector<int> scratch_space[2];
+  scratch_space[0] = vector<int>(*ordered_sets[0]);
+  scratch_space[1] = vector<int>();
+  scratch_space[1].reserve(scratch_space[0].size());
+
+  for (int i = 1; i < ordered_sets.size(); i++) {
+    const vector<int>& prev_result = scratch_space[(i+1) % 2];
+    vector<int>& new_result = scratch_space[i % 2];
+    new_result.clear();
+    set_intersection(prev_result.begin(), prev_result.end(),
+                     ordered_sets.at(i)->begin(), ordered_sets.at(i)->end(),
+                     inserter(new_result, new_result.begin()));
+  }
+
+  return new vector<int>(scratch_space[(ordered_sets.size()+1) % 2]);
 }
 
 
