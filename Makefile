@@ -1,5 +1,5 @@
-CC = g++
-CFLAGS  = -g -Wall -std=c++0x -Wno-sign-compare -O3
+CC = /usr/local/bin/g++
+CFLAGS  = -g -Wall -std=c++0x -Wno-sign-compare -fopenmp -O3
 
 default: run_plan
 

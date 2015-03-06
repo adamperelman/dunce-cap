@@ -123,6 +123,36 @@ int GenericJoinCountInternal(vector<const TrieNode*>& relations,
   return count;
 }
 
+int GenericJoinCountInternalParallel(vector<const TrieNode*>& relations,
+                                     vector<string>::iterator free_attrs_begin,
+                                     vector<string>::iterator free_attrs_end) {
+  if (free_attrs_begin + 1 == free_attrs_end) {
+    vector<const vector<int>*> matching_relations = MatchingNodesForAttr(relations,
+                                                                         *free_attrs_begin);
+    vector<int>* intersection = Intersection(matching_relations);
+    int result = intersection->size();
+    delete intersection;
+    return result;
+  }
+
+  /* Pick I to be {first attribute}, J = V \ I */
+  TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
+  int count = 0;
+
+  #pragma omp parallel for
+  for (int i = 0; i < L->values()->size(); ++i) {
+    int val = L->values()->at(i);
+    vector<const TrieNode*> matching_nodes = MatchingNodesForVal(relations,
+                                                                 *free_attrs_begin,
+                                                                 val);
+
+    count += GenericJoinCountInternal(matching_nodes, free_attrs_begin + 1, free_attrs_end);
+  }
+
+  delete L;
+  return count;
+}
+
 
 vector<string> OrderedAttrs(vector<const TrieNode*>& relations) {
   set<string> attrs;
@@ -143,5 +173,5 @@ TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
 
 int GenericJoinCount(vector<const TrieNode*>& relations) {
   vector<string> ordered_attrs = OrderedAttrs(relations);
-  return GenericJoinCountInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
+  return GenericJoinCountInternalParallel(relations, ordered_attrs.begin(), ordered_attrs.end());
 }
