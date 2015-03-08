@@ -26,10 +26,9 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
   sort(attrs_with_indexes.begin(), attrs_with_indexes.end());
   sort(attrs.begin(), attrs.end());
 
-  TrieNode* root = new TrieNode(attrs[0]);
+  vector<vector<int>> tuples;
 
   ifstream ifs(filename);
-
   string line;
   while (getline(ifs, line)) {
     istringstream iss(line);
@@ -49,7 +48,14 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
       throw runtime_error("tuple length does not match attributes length");
     }
 
-    root->InsertTuple(ordered_tuple.begin(), ordered_tuple.end(), attrs.begin(), attrs.end());
+    tuples.push_back(ordered_tuple);
+  }
+
+  sort(tuples.begin(), tuples.end());
+
+  TrieNode* root = new TrieNode(attrs[0]);
+  for (const vector<int>& t : tuples) {
+    root->AppendTuple(t.begin(), t.end(), attrs.begin(), attrs.end());
   }
   return root;
 }
