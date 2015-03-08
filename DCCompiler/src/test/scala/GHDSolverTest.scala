@@ -52,6 +52,16 @@ class GHDSolverTest extends FunSuite {
     assert(decompositions.contains(twoBagWithRootBC))
   }
 
+  test("Counts number of decompositions of triangle query correctly") {
+    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE.take(3), Set[String]()) // drop the tail
+    /**
+     * The decompositions we expect are
+     * [ABC]
+     * [any one rel] -- [other two rels] (this can be inverted)
+     */
+    assert(decompositions.size == 7)
+  }
+
   test("Finds all possible decompositions of tadpole query)") {
     val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE, Set[String]())
     assert(decompositions.size == 27)
