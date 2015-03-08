@@ -12,7 +12,7 @@ class GHDNode(val rels: List[Relation]) {
   val bagWidth: Int = 0
   val bagFractionalWidth: Double = 0
   override def equals(o: Any) = o match {
-    case that: GHDNode => that.rels == rels
+    case that: GHDNode => that.rels.equals(rels) && that.children.equals(children)
     case _ => false
   }
   override def hashCode = 41  * rels.hashCode() + children.fold(0)((l : List[GHDNode]) => l.hashCode())
@@ -77,10 +77,12 @@ class GHDSolver {
    * @return Each list in the returned list could be the children of the parent that we got parentAttrs from
    */
   def getListsOfPossibleSubtrees(partitions: List[List[Relation]], parentAttrs: Set[String]): List[List[GHDNode]] = {
+    assert(!partitions.isEmpty)
     val subtreesPerPartition: List[List[GHDNode]] = partitions.map((l: List[Relation]) => getMinFractionalWidthDecomposition(l, parentAttrs))
     val foldFunc: (List[List[GHDNode]], List[GHDNode]) => List[List[GHDNode]]
-      = (accum: List[List[GHDNode]], n: List[GHDNode]) => n.map((node: GHDNode) => accum.map((l : List[GHDNode]) => node::l).flatten)
-    return subtreesPerPartition.foldLeft(List[List[GHDNode]]())(foldFunc)
+      = (accum: List[List[GHDNode]], subtreesForOnePartition: List[GHDNode]) => subtreesForOnePartition.map(
+      (subtreeForOnePartition: GHDNode) => accum.map((children: List[GHDNode]) => subtreeForOnePartition::children).flatten)
+    return subtreesPerPartition.foldLeft(List[List[GHDNode]](List[GHDNode]()))(foldFunc)
   }
 
   def getMinFractionalWidthDecomposition(rels: List[Relation], parentAttrs: Set[String]): List[GHDNode] =  {
@@ -89,7 +91,6 @@ class GHDSolver {
     for (tryNumRelationsTogether <- (1 to rels.size).toList) {
       for (bag <- rels.combinations(tryNumRelationsTogether).toList) {
         val leftoverBags = rels.toSet[Relation] &~ bag.toSet[Relation]
-        println("leftOverBags: " + leftoverBags.toList.size)
         if (leftoverBags.toList.isEmpty) {
           val newNode = new GHDNode(bag)
           treesFound.append(newNode)
