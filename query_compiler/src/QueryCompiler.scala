@@ -13,19 +13,16 @@ class Relation(val attrs: List[String]) {
 
 object QueryCompiler extends App {
 
-  def loadingCode(relations : List[Relation]) : String = {
+  def loadingCode(relations : Map[String, Relation]) : String = {
     val data_file = "\"data/facebook_bidirectional.txt\""
     var result = ""
-    for (r <- relations) {
-      result +=
-        s"""
-        |relations.push_back(TrieNode::FromFile($data_file, {${r.attrs.map(a => "\"" + a + "\"").mkString(",")}}));
-        |""".stripMargin
+    for ((rel_name, rel) <- relations) {
+      result += s"TrieNode* $rel_name = TrieNode::FromFile($data_file, {${rel.attrs.map(a => "\"" + a + "\"").mkString(",")}});\n"
     }
     result
   }
 
-  def generateCode(attrs : List[String], relations : List[Relation]): String = {
+  def generateCode(attrs : List[String], relations : Map[String, Relation]): String = {
     val Preamble : String =
       """
       |#include <chrono>
@@ -42,7 +39,7 @@ object QueryCompiler extends App {
       |cout << "loading files..." << endl;
       |""".stripMargin
 
-    val Epilogue =
+    val PerformJoin =
       """
       |typedef chrono::high_resolution_clock Clock;
       |typedef chrono::milliseconds ms;
@@ -58,17 +55,16 @@ object QueryCompiler extends App {
       |
       |cout << join_time.count() << "ms\n" << endl;
       |cout << "size: " << result << endl;
-      |}
       |""".stripMargin
 
-    Preamble + loadingCode(relations) + Epilogue
+    Preamble + loadingCode(relations) + PerformJoin + "}"
   }
 
   override def main (args: Array[String]) {
-    val relations = List(
-      new Relation(List("a", "b")),
-      new Relation(List("b", "c")),
-      new Relation(List("a", "c"))
+    val relations = Map(
+      "r1" -> new Relation(List("a", "b")),
+      "r2" -> new Relation(List("b", "c")),
+      "r3" -> new Relation(List("a", "c"))
     )
 
     val attrs = List("a", "b", "c")
@@ -76,5 +72,6 @@ object QueryCompiler extends App {
     val writer = new PrintWriter(args(0))
     writer.write(generateCode(attrs, relations))
     writer.close()
+    println("done generating code")
   }
 }

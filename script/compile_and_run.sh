@@ -4,6 +4,7 @@
 # the resulting query.
 
 echo "compiling scala classes"
+mkdir -p classes
 scalac -d classes query_compiler/src/QueryCompiler.scala
 
 echo "running scala code"
