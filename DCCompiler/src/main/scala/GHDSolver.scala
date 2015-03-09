@@ -9,13 +9,32 @@ class GHDNode(val rels: List[Relation]) {
   var children: Option[List[GHDNode]] = None
   var subtreeWidth: Int = 0
   var subtreeFractionalWidth: Double = 0
-  val bagWidth: Int = 0
-  val bagFractionalWidth: Double = 0
+  var bagWidth: Int = 0
+  var bagFractionalWidth: Double = 0
   override def equals(o: Any) = o match {
     case that: GHDNode => that.rels.equals(rels) && that.children.equals(children)
     case _ => false
   }
   override def hashCode = 41  * rels.hashCode() + children.fold(0)((l : List[GHDNode]) => l.hashCode())
+
+  def getAttrSet(): Set[String] = {
+    val attrSet = mutable.Set[String]()
+    for (rel <- rels) {
+      for (attr <- rel.attrs) {
+        attrSet += attr
+      }
+    }
+    attrSet.toSet
+  }
+
+  def scoreTree(): Int = {
+    bagWidth = getAttrSet().size
+    if (!children.isDefined) {
+      return bagWidth
+    }
+    val childrenScore = children.get.map((child: GHDNode) => child.scoreTree()).foldLeft(bagWidth)((accum: Int, x : Int) => if (x > accum) x else accum)
+    return childrenScore
+  }
 }
 
 class GHDSolver {
@@ -29,25 +48,25 @@ class GHDSolver {
     attrSet.toSet
   }
 
-  private def getConnectedComponents(rels: mutable.Set[Relation], comps: List[List[Relation]]): List[List[Relation]] = {
+  private def getConnectedComponents(rels: mutable.Set[Relation], comps: List[List[Relation]], ignoreAttrs: Set[String]): List[List[Relation]] = {
     if (rels.isEmpty) return comps
-    val component = getOneConnectedComponent(rels)
-    return getConnectedComponents(rels, component::comps)
+    val component = getOneConnectedComponent(rels, ignoreAttrs)
+    return getConnectedComponents(rels, component::comps, ignoreAttrs)
   }
 
-  private def getOneConnectedComponent(rels: mutable.Set[Relation]): List[Relation] = {
+  private def getOneConnectedComponent(rels: mutable.Set[Relation], ignoreAttrs: Set[String]): List[Relation] = {
     val curr = rels.head
     rels -= curr
-    return DFS(mutable.LinkedHashSet[Relation](curr), curr, rels)
+    return DFS(mutable.LinkedHashSet[Relation](curr), curr, rels, ignoreAttrs)
   }
 
-  private def DFS(seen: mutable.Set[Relation], curr: Relation, rels: mutable.Set[Relation]): List[Relation] = {
+  private def DFS(seen: mutable.Set[Relation], curr: Relation, rels: mutable.Set[Relation], ignoreAttrs: Set[String]): List[Relation] = {
     for (rel <- rels) {
       // if these two hyperedges are connected
-      if (!(curr.attrs.toSet[String] & rel.attrs.toSet[String]).isEmpty) {
+      if (!((curr.attrs.toSet[String] & rel.attrs.toSet[String]) &~ ignoreAttrs).isEmpty) {
         seen += curr
         rels -= curr
-        DFS(seen, rel, rels)
+        DFS(seen, rel, rels, ignoreAttrs)
       }
     }
     return seen.toList
@@ -68,7 +87,7 @@ class GHDSolver {
     // if the concordance condition is satisfied, figure out what components you just
     // partitioned your graph into, and do ghd on each of those disconnected components
     val relations = mutable.LinkedHashSet[Relation]() ++ leftoverBags
-    return Some(getConnectedComponents(relations, List[List[Relation]]()))
+    return Some(getConnectedComponents(relations, List[List[Relation]](), getAttrSet(chosen).toSet[String]))
   }
 
   /**
@@ -111,6 +130,8 @@ class GHDSolver {
     }
     return treesFound.toList
   }
+
+
 }
 
 

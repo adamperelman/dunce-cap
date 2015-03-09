@@ -19,6 +19,12 @@ class GHDSolverTest extends FunSuite {
     new Relation(List("b", "c")),
     new Relation(List("c", "a")),
     new Relation(List("a", "e")))
+  final val SPLIT: List[Relation] = List(
+    new Relation(List("b", "c", "d", "z", "y")),
+    new Relation(List("c", "d", "e", "i", "j")),
+    new Relation(List("b", "d", "f", "g", "h")),
+    new Relation(List("f", "g", "h", "k", "b")),
+    new Relation(List("f", "g", "h", "n", "b")))
   final val solver: GHDSolver = new GHDSolver
 
   test("Can identify connected components of graph when removing the chosen hyper edge leaves 2 disconnected components") {
@@ -62,41 +68,51 @@ class GHDSolverTest extends FunSuite {
     assert(decompositions.size == 7)
   }
 
+  test("Find max bag size 5 decomposition of query") {
+    val decompositions2 = solver.getMinFractionalWidthDecomposition(SPLIT, Set[String]())
+    assert(!decompositions2.filter((root: GHDNode) => root.scoreTree <= 5).isEmpty)
+  }
+
   test("Finds all possible decompositions of tadpole query)") {
     val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE, Set[String]())
-    assert(decompositions.size == 27)
-    assert(decompositions.filter((root: GHDNode) => root.rels.size == 1).size == 14)
-    assert(decompositions.filter((root: GHDNode) => root.rels.size == 2).size == 8)
+    assert(decompositions.size == 21)
+    assert(decompositions.filter((root: GHDNode) => root.rels.size == 1).size == 10)
+    assert(decompositions.filter((root: GHDNode) => root.rels.size == 2).size == 6)
     assert(decompositions.filter((root: GHDNode) => root.rels.size == 3).size == 4)
     assert(decompositions.filter((root: GHDNode) => root.rels.size == 4).size == 1)
     val decompositionsSet = decompositions.toSet[GHDNode]
     /**
      * The decompositions we expect are
-     * [AB]--[ABC]--[AE] (*)
-     * [AC]--[ABC]--[AE]
-     * [BC]--[ABC]--[AE]
+     * [AB]--[ABC] (*)
+     *  |
+     * [AE]
+     *
+     * root of above tree could also be AC
+     *
      * [AB]--[ABCE]
      * [AC]--[ABCE]
      * [BC]--[ABCE]
-     * [AC]--[ABCE]--[AB]
-     * [AE]--[AB]--[ABC]
      *
      * [ABC]--[AE]
      * [ABE]--[ABC] (*)
      * [ACE]--[ABC]
-     * [ABCE]--[ABC]
+     * [AEBC]--[ABC]
      *
-     * all of the above also work if you invert the tree
+     * all of the above 2-node options also work if you switch the root and leaf
+     *
+     * [AE]--[AB]--[ABC]
+     * [AE]--[ABC]--[AB]
+     * [BC]--[ABC]--[AE]
+     * [AE]--[ABC]--[BC]
      *
      * [ABCE] (*)
      *
      * Check that the ones marked (*) were found:
      */
     val decomp1 = new GHDNode(List(TADPOLE(0)))
-    val decomp1Child = new GHDNode(List(TADPOLE(1), TADPOLE(2)))
-    val decomp1GrandChild = new GHDNode(List(TADPOLE(3)))
-    decomp1Child.children = Some(List(decomp1GrandChild))
-    decomp1.children = Some(List(decomp1Child))
+    val decomp1Child1 = new GHDNode(List(TADPOLE(1), TADPOLE(2)))
+    val decomp1Child2 = new GHDNode(List(TADPOLE(3)))
+    decomp1.children = Some(List(decomp1Child1, decomp1Child2))
     assert(decompositionsSet.contains(decomp1))
 
     val decomp2 = new GHDNode(List(TADPOLE(0), TADPOLE(3)))
