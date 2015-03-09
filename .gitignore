@@ -40,3 +40,5 @@ annotated_*
 # intellij stuff
 .idea
 target
+*/out/*
+classes/*
