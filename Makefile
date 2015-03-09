@@ -1,7 +1,10 @@
 CC = g++
 CFLAGS  = -g -Wall -std=c++0x -Wno-sign-compare -O3
 
-default: run_plan
+default: generated_query
+
+generated_query: generated_query.o relation.o yannakakis.o generic_join.o
+	$(CC) $(CFLAGS) generated_query.o relation.o generic_join.o yannakakis.o -o generated_query.exe
 
 relation_test: relation_test.o relation.o generic_join.o
 	$(CC) $(CFLAGS) relation_test.o relation.o generic_join.o -o relation_test.exe
@@ -38,6 +41,9 @@ pairwise.o: src/pairwise.cc
 
 run_plan.o: src/run_plan.cc
 	$(CC) $(CFLAGS) -c src/run_plan.cc
+
+generated_query.o: src/GENERATED_QUERY.cc
+	$(CC) $(CFLAGS) -c src/GENERATED_QUERY.cc
 
 generic_join.o: src/generic_join.h src/generic_join.cc
 	$(CC) $(CFLAGS) -c src/generic_join.cc

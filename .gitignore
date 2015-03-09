@@ -41,3 +41,4 @@ annotated_*
 .idea
 target
 */out/*
+classes/*
