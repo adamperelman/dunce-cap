@@ -13,8 +13,9 @@ object GHDWriter {
       new Relation(List("b", "c")),
       new Relation(List("c", "a")),
       new Relation(List("a", "e")))
-    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE, Set[String]())
+    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE.take(3), Set[String]())
     decompositions.zipWithIndex.map({case (root, i) => print(root, "../query_plans/tadpole_generated" + i+ ".json")})
+    println(decompositions.map((root : GHDNode) => root.fractionalScoreTree()))
   }
 
   def print(root: GHDNode, filename: String) = {

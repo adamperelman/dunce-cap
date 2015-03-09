@@ -58,7 +58,7 @@ class GHDSolverTest extends FunSuite {
     assert(decompositions.contains(twoBagWithRootBC))
   }
 
-  test("Counts number of decompositions of triangle query correctly") {
+  test("Decomps and scores triangle query correctly") {
     val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE.take(3), Set[String]()) // drop the tail
     /**
      * The decompositions we expect are
@@ -66,6 +66,8 @@ class GHDSolverTest extends FunSuite {
      * [any one rel] -- [other two rels] (this can be inverted)
      */
     assert(decompositions.size == 7)
+    val fractionalScores = decompositions.map((root: GHDNode) => root.fractionalScoreTree())
+    assert(fractionalScores.max === 1.5)
   }
 
   test("Find max bag size 5 decomposition of query") {

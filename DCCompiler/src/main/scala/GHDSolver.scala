@@ -2,55 +2,10 @@ package DCCompiler
 
 import java.io.{File, FileWriter, BufferedWriter}
 
+
 import scala.collection.mutable
-import argonaut._, Argonaut._
 
-class Relation(val attrs: List[String]) {
-}
 
-class GHDNode(val rels: List[Relation]) {
-  var children: Option[List[GHDNode]] = None
-  var subtreeWidth: Int = 0
-  var subtreeFractionalWidth: Double = 0
-  var bagWidth: Int = 0
-  var bagFractionalWidth: Double = 0
-
-  override def equals(o: Any) = o match {
-    case that: GHDNode => that.rels.equals(rels) && that.children.equals(children)
-    case _ => false
-  }
-
-  override def hashCode = 41 * rels.hashCode() + children.fold(0)((l: List[GHDNode]) => l.hashCode())
-
-  def getAttrSet(): Set[String] = {
-    val attrSet = mutable.Set[String]()
-    for (rel <- rels) {
-      for (attr <- rel.attrs) {
-        attrSet += attr
-      }
-    }
-    attrSet.toSet
-  }
-
-  def scoreTree(): Int = {
-    bagWidth = getAttrSet().size
-    if (!children.isDefined) {
-      return bagWidth
-    }
-    val childrenScore = children.get.map((child: GHDNode) => child.scoreTree()).foldLeft(bagWidth)((accum: Int, x: Int) => if (x > accum) x else accum)
-    return childrenScore
-  }
-
-  def toJson(): Json = {
-    val relationsJson = jArray(rels.map((rel : Relation) => Json("attrs" -> jArray(rel.attrs.map((str: String) => jString(str))))))
-
-    if (children.isDefined) {
-      return Json("relations" -> relationsJson, "children" -> jArray(children.get.map((child: GHDNode) => child.toJson())))
-    } else {
-      return Json("relations" -> relationsJson)
-    }
-  }
-}
 
 object GHDSolver {
   def getAttrSet(rels: List[Relation]): Set[String] = {
