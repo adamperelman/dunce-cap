@@ -25,7 +25,7 @@ class GHDSolverTest extends FunSuite {
     new Relation(List("b", "d", "f", "g", "h")),
     new Relation(List("f", "g", "h", "k", "b")),
     new Relation(List("f", "g", "h", "n", "b")))
-  final val solver: GHDSolver = new GHDSolver
+  final val solver = GHDSolver
 
   test("Can identify connected components of graph when removing the chosen hyper edge leaves 2 disconnected components") {
     val chosen = List(RELATIONS.head)

@@ -8,3 +8,4 @@ libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
 
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
+libraryDependencies += "io.argonaut" %% "argonaut" % "6.0.4"
