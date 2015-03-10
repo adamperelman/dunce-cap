@@ -1,19 +1,11 @@
 package DCCompiler
 
-import java.io.{File, FileWriter, BufferedWriter}
-
-
 import scala.collection.mutable
 
 object GHDSolver {
   def getAttrSet(rels: List[Relation]): Set[String] = {
-    val attrSet = mutable.Set[String]()
-    for (rel <- rels) {
-      for (attr <- rel.attrs) {
-        attrSet += attr
-      }
-    }
-    attrSet.toSet
+    return rels.foldLeft(Set[String]())(
+      (accum: Set[String], rel : Relation) => accum | rel.attrs.toSet[String])
   }
 
   private def getConnectedComponents(rels: mutable.Set[Relation], comps: List[List[Relation]], ignoreAttrs: Set[String]): List[List[Relation]] = {
@@ -73,7 +65,6 @@ object GHDSolver {
   }
 
   def getMinFractionalWidthDecomposition(rels: List[Relation], parentAttrs: Set[String]): List[GHDNode] =  {
-    val attrSet = getAttrSet(rels)
     val treesFound = mutable.ListBuffer[GHDNode]()
     for (tryNumRelationsTogether <- (1 to rels.size).toList) {
       for (bag <- rels.combinations(tryNumRelationsTogether).toList) {

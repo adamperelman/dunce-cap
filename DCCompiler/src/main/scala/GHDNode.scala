@@ -7,8 +7,6 @@ import argonaut.Json
 import org.apache.commons.math3.optim.linear._
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 
-import scala.collection.mutable
-
 /**
  * Created by sctu on 3/9/15.
  */
@@ -16,6 +14,8 @@ class Relation(val attrs: List[String]) {
 }
 
 class GHDNode(val rels: List[Relation]) {
+  val attrSet = rels.foldLeft(Set[String]())(
+    (accum: Set[String], rel : Relation) => accum | rel.attrs.toSet[String])
   var children: Option[List[GHDNode]] = None
   var subtreeWidth: Int = 0
   var subtreeFractionalWidth: Double = 0
@@ -29,18 +29,8 @@ class GHDNode(val rels: List[Relation]) {
 
   override def hashCode = 41 * rels.hashCode() + children.fold(0)((l: List[GHDNode]) => l.hashCode())
 
-  def getAttrSet(): Set[String] = {
-    val attrSet = mutable.Set[String]()
-    for (rel <- rels) {
-      for (attr <- rel.attrs) {
-        attrSet += attr
-      }
-    }
-    attrSet.toSet
-  }
-
   def scoreTree(): Int = {
-    bagWidth = getAttrSet().size
+    bagWidth = attrSet.size
     if (!children.isDefined) {
       return bagWidth
     }
@@ -54,16 +44,13 @@ class GHDNode(val rels: List[Relation]) {
   }
 
   def fractionalScoreNode(): Double = { // TODO: catch UnboundedSolutionException
-    val bagAttrs = getAttrSet().toList
-    // objective:
     val objective = new LinearObjectiveFunction(rels.map((rel : Relation) => 1.0).toArray, 0)
     // constraints:
     val constraintList = new util.ArrayList[LinearConstraint]
-    bagAttrs.map((attr : String) => constraintList.add(new LinearConstraint(getMatrixRow(attr, rels), Relationship.GEQ,  1.0)))
+    attrSet.map((attr : String) => constraintList.add(new LinearConstraint(getMatrixRow(attr, rels), Relationship.GEQ,  1.0)))
     val constraints = new LinearConstraintSet(constraintList)
     val solver = new SimplexSolver
     val solution = solver.optimize(objective, constraints, GoalType.MINIMIZE, new NonNegativeConstraint(true))
-    println(solution.getValue)
     return solution.getValue
   }
 
