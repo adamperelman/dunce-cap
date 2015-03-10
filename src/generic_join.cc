@@ -7,32 +7,31 @@
 
 using namespace std;
 
+// TODO: make sure we use these global vars safely
+// if we do multithreading!
+vector<int> scratch_space[2];
+
 bool vectorLengthCmp(const vector<int>* a, const vector<int>* b) {
   return a->size() < b->size();
 }
 
 vector<int>* Intersection(vector<const vector<int>*>& ordered_sets) {
-  if (ordered_sets.size() == 1) {
-    return new vector<int>(*ordered_sets[0]);
-  }
-
   sort(ordered_sets.begin(), ordered_sets.end(), vectorLengthCmp);
 
-  vector<int> scratch_space[2];
-  scratch_space[0] = vector<int>(*ordered_sets[0]);
-  scratch_space[1] = vector<int>();
-  scratch_space[1].reserve(scratch_space[0].size());
+  const vector<int>* prev_result = ordered_sets[0];
+  vector<int>* new_result = &scratch_space[0];
 
   for (int i = 1; i < ordered_sets.size(); i++) {
-    const vector<int>& prev_result = scratch_space[(i+1) % 2];
-    vector<int>& new_result = scratch_space[i % 2];
-    new_result.clear();
-    set_intersection(prev_result.begin(), prev_result.end(),
-                     ordered_sets.at(i)->begin(), ordered_sets.at(i)->end(),
-                     inserter(new_result, new_result.begin()));
+    new_result->clear();
+    set_intersection(prev_result->begin(), prev_result->end(),
+                     ordered_sets[i]->begin(), ordered_sets[i]->end(),
+                     inserter(*new_result, new_result->begin()));
+
+    prev_result = new_result;
+    new_result = &scratch_space[i % 2];
   }
 
-  return new vector<int>(scratch_space[(ordered_sets.size()+1) % 2]);
+  return new vector<int>(*prev_result);
 }
 
 inline vector<const vector<int>*> MatchingNodesForAttr(vector<const TrieNode*>& relations,
@@ -136,12 +135,19 @@ vector<string> OrderedAttrs(vector<const TrieNode*>& relations) {
   return ordered_attrs;
 }
 
+void InitializeScratchSpace(vector<const TrieNode*>& relations) {
+  scratch_space[0] = vector<int>();
+  scratch_space[1] = vector<int>();
+}
+
 TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
+  InitializeScratchSpace(relations);
   vector<string> ordered_attrs = OrderedAttrs(relations);
   return GenericJoinInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
 }
 
 int GenericJoinCount(vector<const TrieNode*>& relations) {
+  InitializeScratchSpace(relations);
   vector<string> ordered_attrs = OrderedAttrs(relations);
   return GenericJoinCountInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
 }
