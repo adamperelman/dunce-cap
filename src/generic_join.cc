@@ -15,7 +15,7 @@ bool vectorLengthCmp(const vector<int>* a, const vector<int>* b) {
   return a->size() < b->size();
 }
 
-vector<int>* Intersection(vector<const vector<int>*>& ordered_sets) {
+inline vector<int> Intersection(vector<const vector<int>*>& ordered_sets) {
   sort(ordered_sets.begin(), ordered_sets.end(), vectorLengthCmp);
 
   const vector<int>* prev_result = ordered_sets[0];
@@ -31,7 +31,7 @@ vector<int>* Intersection(vector<const vector<int>*>& ordered_sets) {
     new_result = &scratch_space[i % 2];
   }
 
-  return new vector<int>(*prev_result);
+  return *prev_result;
 }
 
 inline vector<const vector<int>*> MatchingNodesForAttr(vector<const TrieNode*>& relations,
@@ -43,7 +43,7 @@ inline vector<const vector<int>*> MatchingNodesForAttr(vector<const TrieNode*>& 
     // it must be the node's own attribute (i.e. not the attribute of one
     // of its children), since we've already bound all previous attributes.
     if (rel->attr() == attr) {
-      matching_relations.push_back(rel->values());
+      matching_relations.push_back(&rel->values());
     }
   }
   return matching_relations;
@@ -77,7 +77,7 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
   /* Pick I to be {first attribute}, J = V \ I */
   TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
   TrieNode* result = new TrieNode(*free_attrs_begin);
-  for (int val : *L->values()) {
+  for (int val : L->values()) {
     vector<const TrieNode*> matching_nodes = MatchingNodesForVal(relations,
                                                                  *free_attrs_begin,
                                                                  val);
@@ -101,16 +101,13 @@ int GenericJoinCountInternal(vector<const TrieNode*>& relations,
   if (free_attrs_begin + 1 == free_attrs_end) {
     vector<const vector<int>*> matching_relations = MatchingNodesForAttr(relations,
                                                                          *free_attrs_begin);
-    vector<int>* intersection = Intersection(matching_relations);
-    int result = intersection->size();
-    delete intersection;
-    return result;
+    return Intersection(matching_relations).size();
   }
 
   /* Pick I to be {first attribute}, J = V \ I */
   TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
   int count = 0;
-  for (int val : *L->values()) {
+  for (int val : L->values()) {
     vector<const TrieNode*> matching_nodes = MatchingNodesForVal(relations,
                                                                  *free_attrs_begin,
                                                                  val);

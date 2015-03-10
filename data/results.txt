@@ -17,4 +17,4 @@
 
 ***FACEBOOK DATASET***
 720112032 4-cliques
-*GenericJoinCount: 32218ms
+*GenericJoinCount: 31431ms
