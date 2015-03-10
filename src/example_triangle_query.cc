@@ -53,9 +53,9 @@ int main(int argc, char* argv[]) {
   // Start of join code
   //
 
-  // TODO: can we skip this, since we know A values are shared?
   vector<const vector<int>*> matching = {&r1->values(), &r3->values()};
-  TrieNode* result_a = new TrieNode("a");
+
+  int result = 0;
   vector<int> shared_a = Intersection(matching);
 
   for (int a : shared_a) {
@@ -64,7 +64,6 @@ int main(int argc, char* argv[]) {
     assert(r1_a && r3_a);
 
     vector<const vector<int>*> matching = {&r1_a->values(), &r2->values()};
-    TrieNode* result_b = new TrieNode("b");
     vector<int> shared_b = Intersection(matching);
 
     for (int b : shared_b) {
@@ -72,17 +71,10 @@ int main(int argc, char* argv[]) {
       assert(r2_b);
 
       vector<const vector<int>*> matching = {&r2_b->values(), &r3_a->values()};
-      TrieNode* result_c = new TrieNode("c", Intersection(matching));
 
-      if (result_c->size()) result_b->AddChildNode(b, result_c);
-      else delete result_c;
+      result += Intersection(matching).size();
     }
-
-    if (result_b->size()) result_a->AddChildNode(a, result_b);
-    else delete result_b;
   }
-
-  int result = result_a->size();
 
   //
   // End of join code
