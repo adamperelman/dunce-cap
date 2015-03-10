@@ -32,6 +32,7 @@ object GHDSolver {
     return seen.toList
   }
 
+  // Visible for testing
   def getPartitions(leftoverBags: List[Relation], // this cannot contain chosen
                     chosen: List[Relation],
                     parentAttrs: Set[String],
@@ -55,7 +56,7 @@ object GHDSolver {
    * @param parentAttrs
    * @return Each list in the returned list could be the children of the parent that we got parentAttrs from
    */
-  def getListsOfPossibleSubtrees(partitions: List[List[Relation]], parentAttrs: Set[String]): List[List[GHDNode]] = {
+  private def getListsOfPossibleSubtrees(partitions: List[List[Relation]], parentAttrs: Set[String]): List[List[GHDNode]] = {
     assert(!partitions.isEmpty)
     val subtreesPerPartition: List[List[GHDNode]] = partitions.map((l: List[Relation]) => getMinFractionalWidthDecomposition(l, parentAttrs))
     val foldFunc: (List[List[GHDNode]], List[GHDNode]) => List[List[GHDNode]]
@@ -64,7 +65,7 @@ object GHDSolver {
     return subtreesPerPartition.foldLeft(List[List[GHDNode]](List[GHDNode]()))(foldFunc)
   }
 
-  def getMinFractionalWidthDecomposition(rels: List[Relation], parentAttrs: Set[String]): List[GHDNode] =  {
+  private def getMinFractionalWidthDecomposition(rels: List[Relation], parentAttrs: Set[String]): List[GHDNode] =  {
     val treesFound = mutable.ListBuffer[GHDNode]()
     for (tryNumRelationsTogether <- (1 to rels.size).toList) {
       for (bag <- rels.combinations(tryNumRelationsTogether).toList) {
@@ -89,6 +90,11 @@ object GHDSolver {
     }
     return treesFound.toList
   }
+
+  def getMinFractionalWidthDecomposition(rels: List[Relation]): List[GHDNode] = {
+    return getMinFractionalWidthDecomposition(rels, Set[String]())
+  }
+
 }
 
 

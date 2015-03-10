@@ -7,9 +7,6 @@ import argonaut.Json
 import org.apache.commons.math3.optim.linear._
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 
-/**
- * Created by sctu on 3/9/15.
- */
 class Relation(val attrs: List[String]) {
 }
 
@@ -38,12 +35,12 @@ class GHDNode(val rels: List[Relation]) {
     return childrenScore
   }
 
-  def getMatrixRow(attr : String, rels : List[Relation]): Array[Double] = {
+  private def getMatrixRow(attr : String, rels : List[Relation]): Array[Double] = {
     val presence = rels.map((rel : Relation) => if (rel.attrs.toSet.contains(attr)) 1.0 else 0)
     return presence.toArray
   }
 
-  def fractionalScoreNode(): Double = { // TODO: catch UnboundedSolutionException
+  private def fractionalScoreNode(): Double = { // TODO: catch UnboundedSolutionException
     val objective = new LinearObjectiveFunction(rels.map((rel : Relation) => 1.0).toArray, 0)
     // constraints:
     val constraintList = new util.ArrayList[LinearConstraint]

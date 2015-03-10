@@ -2,9 +2,6 @@ package DCCompiler
 
 import org.scalatest.FunSuite
 
-/**
- * Created by sctu on 3/4/15.
- */
 class GHDSolverTest extends FunSuite {
   final val RELATIONS: List[Relation] = List(
     new Relation(List("a", "b", "c")),
@@ -43,7 +40,7 @@ class GHDSolverTest extends FunSuite {
   }
 
   test("Finds all possible decompositions of len 2 path query)") {
-    val decompositions = solver.getMinFractionalWidthDecomposition(PATH2, Set[String]()).toSet[GHDNode]
+    val decompositions = solver.getMinFractionalWidthDecomposition(PATH2).toSet[GHDNode]
     /**
      * The decompositions we expect are [ABC] and [AB]--[BC] and [BC]--[AB]
      */
@@ -59,7 +56,7 @@ class GHDSolverTest extends FunSuite {
   }
 
   test("Decomps and scores triangle query correctly") {
-    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE.take(3), Set[String]()) // drop the tail
+    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE.take(3)) // drop the tail
     /**
      * The decompositions we expect are
      * [ABC]
@@ -71,12 +68,12 @@ class GHDSolverTest extends FunSuite {
   }
 
   test("Find max bag size 5 decomposition of query") {
-    val decompositions2 = solver.getMinFractionalWidthDecomposition(SPLIT, Set[String]())
+    val decompositions2 = solver.getMinFractionalWidthDecomposition(SPLIT)
     assert(!decompositions2.filter((root: GHDNode) => root.scoreTree <= 5).isEmpty)
   }
 
   test("Finds all possible decompositions of tadpole query)") {
-    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE, Set[String]())
+    val decompositions = solver.getMinFractionalWidthDecomposition(TADPOLE)
     assert(decompositions.size == 21)
     assert(decompositions.filter((root: GHDNode) => root.rels.size == 1).size == 10)
     assert(decompositions.filter((root: GHDNode) => root.rels.size == 2).size == 6)
