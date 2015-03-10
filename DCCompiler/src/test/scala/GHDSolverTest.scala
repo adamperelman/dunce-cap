@@ -67,7 +67,7 @@ class GHDSolverTest extends FunSuite {
      */
     assert(decompositions.size == 7)
     val fractionalScores = decompositions.map((root: GHDNode) => root.fractionalScoreTree())
-    assert(fractionalScores.max === 1.5)
+    assert(fractionalScores.min === 1.5)
   }
 
   test("Find max bag size 5 decomposition of query") {
@@ -124,5 +124,14 @@ class GHDSolverTest extends FunSuite {
 
     val decomp3 = new GHDNode(List(TADPOLE(0), TADPOLE(1), TADPOLE(2), TADPOLE(3)))
     assert(decompositionsSet.contains(decomp3))
+
+    // Also check that we found the lowest fhw option
+    val decomp4 = new GHDNode(List(TADPOLE(3)))
+    val decomp4Child = new GHDNode(List(TADPOLE(0), TADPOLE(1), TADPOLE(2)))
+    decomp4.children = Some(List(decomp4Child))
+    assert(decompositionsSet.contains(decomp4))
+
+    val fractionalScores = decompositions.map((root: GHDNode) => root.fractionalScoreTree())
+    assert(fractionalScores.min === 1.5)
   }
 }

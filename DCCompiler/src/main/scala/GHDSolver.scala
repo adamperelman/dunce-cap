@@ -5,8 +5,6 @@ import java.io.{File, FileWriter, BufferedWriter}
 
 import scala.collection.mutable
 
-
-
 object GHDSolver {
   def getAttrSet(rels: List[Relation]): Set[String] = {
     val attrSet = mutable.Set[String]()

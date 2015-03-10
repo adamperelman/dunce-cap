@@ -9,17 +9,10 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 
 import scala.collection.mutable
 
-
 /**
  * Created by sctu on 3/9/15.
  */
-
 class Relation(val attrs: List[String]) {
-  def getMatrixRow(attrs : List[String]): Array[Double] = {
-    val attrSet = this.attrs.toSet
-    val presence = attrs.map((str: String) => if (attrSet.contains(str)) 1.0 else 0)
-    return presence.toArray
-  }
 }
 
 class GHDNode(val rels: List[Relation]) {
@@ -55,16 +48,22 @@ class GHDNode(val rels: List[Relation]) {
     return childrenScore
   }
 
+  def getMatrixRow(attr : String, rels : List[Relation]): Array[Double] = {
+    val presence = rels.map((rel : Relation) => if (rel.attrs.toSet.contains(attr)) 1.0 else 0)
+    return presence.toArray
+  }
+
   def fractionalScoreNode(): Double = { // TODO: catch UnboundedSolutionException
     val bagAttrs = getAttrSet().toList
     // objective:
-    val objective = new LinearObjectiveFunction(bagAttrs.map((attr : String) => 1.0).toArray, 0)
+    val objective = new LinearObjectiveFunction(rels.map((rel : Relation) => 1.0).toArray, 0)
     // constraints:
     val constraintList = new util.ArrayList[LinearConstraint]
-    rels.map((rel : Relation) => constraintList.add(new LinearConstraint(rel.getMatrixRow(bagAttrs), Relationship.GEQ,  1.0)))
+    bagAttrs.map((attr : String) => constraintList.add(new LinearConstraint(getMatrixRow(attr, rels), Relationship.GEQ,  1.0)))
     val constraints = new LinearConstraintSet(constraintList)
     val solver = new SimplexSolver
     val solution = solver.optimize(objective, constraints, GoalType.MINIMIZE, new NonNegativeConstraint(true))
+    println(solution.getValue)
     return solution.getValue
   }
 
@@ -73,7 +72,8 @@ class GHDNode(val rels: List[Relation]) {
     if (!children.isDefined) {
       return bagFractionalWidth
     }
-    val childrenScore = children.get.map((child: GHDNode) => child.fractionalScoreTree()).foldLeft(bagFractionalWidth)((accum: Double, x: Double) => if (x > accum) x else accum)
+    val childrenScore = children.get.map((child: GHDNode) => child.fractionalScoreTree())
+      .foldLeft(bagFractionalWidth)((accum: Double, x: Double) => if (x > accum) x else accum)
     return childrenScore
   }
 
