@@ -6,6 +6,9 @@ default: run_plan
 generated_query: generated_query.o relation.o yannakakis.o generic_join.o
 	$(CC) $(CFLAGS) generated_query.o relation.o generic_join.o yannakakis.o -o generated_query.exe
 
+triangle: example_triangle_query.o relation.o yannakakis.o generic_join.o
+	$(CC) $(CFLAGS) example_triangle_query.o relation.o generic_join.o yannakakis.o -o triangle_handcoded.exe
+
 relation_test: relation_test.o relation.o generic_join.o
 	$(CC) $(CFLAGS) relation_test.o relation.o generic_join.o -o relation_test.exe
 
@@ -24,9 +27,6 @@ generic_join_test.o: test/generic_join_test.cc
 yannakakis_test.o: test/yannakakis_test.cc
 	$(CC) $(CFLAGS) -c test/yannakakis_test.cc
 
-triangle: triangle.o relation.o generic_join.o
-	$(CC) $(CFLAGS) triangle.o relation.o generic_join.o -o triangle.exe
-
 pairwise: pairwise.o relation.o generic_join.o
 	$(CC) $(CFLAGS) pairwise.o relation.o generic_join.o -o pairwise.exe
 
@@ -44,6 +44,9 @@ run_plan.o: src/run_plan.cc
 
 generated_query.o: src/GENERATED_QUERY.cc
 	$(CC) $(CFLAGS) -c src/GENERATED_QUERY.cc
+
+example_triangle_query.o: src/example_triangle_query.cc
+	$(CC) $(CFLAGS) -c src/example_triangle_query.cc
 
 generic_join.o: src/generic_join.h src/generic_join.cc
 	$(CC) $(CFLAGS) -c src/generic_join.cc
