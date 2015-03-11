@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
   typedef chrono::milliseconds ms;
 
   Clock::time_point start_join = Clock::now();
-  int result = YannakakisCount(root_bag.get());
+  long result = YannakakisCount(root_bag.get());
   Clock::time_point end_join = Clock::now();
 
   cout << "done performing join" << endl;

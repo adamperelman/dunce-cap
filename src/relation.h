@@ -22,8 +22,8 @@ public:
   static TrieNode* PairwiseJoin(const TrieNode* r1,
                                 const TrieNode* r2);
 
-  static int PairwiseCount(const TrieNode* parent,
-                           const TrieNode* child);
+  static long PairwiseCount(const TrieNode* parent,
+                            const TrieNode* child);
 
   std::vector<std::string> attrs() const;
 

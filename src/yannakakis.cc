@@ -36,7 +36,7 @@ void JoinWithChildren(BagNode* root_bag) {
   }
 }
 
-int CountWithChildren(BagNode* root_bag) {
+long CountWithChildren(BagNode* root_bag) {
   // TODO: assumes that there are only 2 bags.
   return TrieNode::PairwiseCount(root_bag->joined.get(),
                                  root_bag->children[0]->joined.get());
@@ -56,7 +56,7 @@ TrieNode* YannakakisJoin(BagNode* root_bag) {
   return root_bag->joined.release();
 }
 
-int YannakakisCount(BagNode* root_bag) {
+long YannakakisCount(BagNode* root_bag) {
   // TODO: only works for 1 or 2 bag case right now
   if (root_bag->children.empty()) {
     return GenericJoinCount(root_bag->relations);

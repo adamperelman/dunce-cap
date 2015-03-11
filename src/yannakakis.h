@@ -14,6 +14,6 @@ struct BagNode {
 };
 
 TrieNode* YannakakisJoin(BagNode* root_bag);
-int YannakakisCount(BagNode* root_bag);
+long YannakakisCount(BagNode* root_bag);
 
 #endif
