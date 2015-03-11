@@ -15,7 +15,9 @@ public:
   TrieNode(const std::string& attr) : attr_(attr), values_() {}
   TrieNode(const std::string& attr, std::vector<int> values) : attr_(attr), values_(values), children_(values.size()) {}
 
-  static TrieNode* FromFile(const std::string& filename, std::vector<std::string> attrs);
+  static TrieNode* FromFile(const std::string& filename,
+                            std::vector<std::string> attrs,
+                            bool prune=false);
 
   static TrieNode* PairwiseJoin(const TrieNode* r1,
                                 const TrieNode* r2);

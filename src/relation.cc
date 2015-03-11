@@ -19,7 +19,7 @@ struct tuple_hash {
   }
 };
 
-TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
+TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs, bool prune) {
   vector<pair<string, int>> attrs_with_indexes;
   for (int i = 0; i < attrs.size(); i++) {
     attrs_with_indexes.push_back(make_pair(attrs[i], i));
@@ -45,6 +45,10 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
     for (int i = 0; i < tuple.size(); i++) {
       int index = attrs_with_indexes[i].second;
       ordered_tuple.push_back(tuple[index]);
+    }
+
+    if (prune && !is_sorted(ordered_tuple.begin(), ordered_tuple.end())) {
+      continue;
     }
 
     if (ordered_tuple.size() != attrs.size()) {

@@ -18,7 +18,9 @@ BagNode* BuildPlanSubtree(picojson::value v, string data_file) {
     for (const picojson::value& attr : rel.get("attrs").get<picojson::array>()) {
       attrs.push_back(attr.get<string>());
     }
-    bag_node->relations.push_back(TrieNode::FromFile(data_file, attrs));
+    bool prune = (rel.get("prune").is<string>() &&
+                  rel.get("prune").get<string>() == "true");
+    bag_node->relations.push_back(TrieNode::FromFile(data_file, attrs, prune));
   }
   const picojson::value& children = v.get("children");
   if (children.is<picojson::array>()) {
