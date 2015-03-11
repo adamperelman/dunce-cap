@@ -32,6 +32,8 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
   ifstream ifs(filename);
   string line;
   while (getline(ifs, line)) {
+    if (line[0] == '#') continue;
+
     istringstream iss(line);
     int temp;
     vector<int> tuple;

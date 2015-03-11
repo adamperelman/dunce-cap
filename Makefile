@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS  = -g -Wall -std=c++0x -Wno-sign-compare -O3
+CFLAGS  = -g -Wall -std=c++11 -Wno-sign-compare -O3
 
 default: run_plan
 
