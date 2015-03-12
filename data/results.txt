@@ -1,7 +1,7 @@
 ***ARXIV-GR DATASET***
 341755386 (=56959231 * 6) lollipops (4-clique with tail of length1)
 *sqlite: 11m 45s
-*Y with pairwise performed by GJ: 1030ms
+*YCount: 525ms
 
 
 ***FACEBOOK DATASET***
