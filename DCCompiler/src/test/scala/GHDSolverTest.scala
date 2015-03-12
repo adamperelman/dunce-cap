@@ -47,9 +47,9 @@ class GHDSolverTest extends FunSuite {
     assert(decompositions.size == 3)
     val singleBag = new GHDNode(PATH2)
     val twoBagWithRootAB = new GHDNode(PATH2.take(1))
-    twoBagWithRootAB.children = Some(List(new GHDNode(PATH2.tail.take(1))))
+    twoBagWithRootAB.children = List(new GHDNode(PATH2.tail.take(1)))
     val twoBagWithRootBC = new GHDNode(PATH2.tail.take(1))
-    twoBagWithRootBC.children = Some(List(new GHDNode(PATH2.take(1))))
+    twoBagWithRootBC.children = List(new GHDNode(PATH2.take(1)))
     assert(decompositions.contains(singleBag))
     assert(decompositions.contains(twoBagWithRootAB))
     assert(decompositions.contains(twoBagWithRootBC))
@@ -111,12 +111,12 @@ class GHDSolverTest extends FunSuite {
     val decomp1 = new GHDNode(List(TADPOLE(0)))
     val decomp1Child1 = new GHDNode(List(TADPOLE(1), TADPOLE(2)))
     val decomp1Child2 = new GHDNode(List(TADPOLE(3)))
-    decomp1.children = Some(List(decomp1Child1, decomp1Child2))
+    decomp1.children = List(decomp1Child1, decomp1Child2)
     assert(decompositionsSet.contains(decomp1))
 
     val decomp2 = new GHDNode(List(TADPOLE(0), TADPOLE(3)))
     val decomp2Child = new GHDNode(List(TADPOLE(1), TADPOLE(2)))
-    decomp2.children = Some(List(decomp2Child))
+    decomp2.children = List(decomp2Child)
     assert(decompositionsSet.contains(decomp2))
 
     val decomp3 = new GHDNode(List(TADPOLE(0), TADPOLE(1), TADPOLE(2), TADPOLE(3)))
@@ -125,7 +125,7 @@ class GHDSolverTest extends FunSuite {
     // Also check that we found the lowest fhw option
     val decomp4 = new GHDNode(List(TADPOLE(3)))
     val decomp4Child = new GHDNode(List(TADPOLE(0), TADPOLE(1), TADPOLE(2)))
-    decomp4.children = Some(List(decomp4Child))
+    decomp4.children = List(decomp4Child)
     assert(decompositionsSet.contains(decomp4))
 
     val fractionalScores = decompositions.map((root: GHDNode) => root.fractionalScoreTree())

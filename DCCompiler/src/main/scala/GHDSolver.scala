@@ -81,7 +81,7 @@ object GHDSolver {
             val possibleSubtrees: List[List[GHDNode]] = getListsOfPossibleSubtrees(partitions.get, bagAttrSet)
             for (subtrees <- possibleSubtrees) {
               val newNode = new GHDNode(bag)
-              newNode.children = Some(subtrees)
+              newNode.children = subtrees
               treesFound.append(newNode)
             }
           }
@@ -94,7 +94,6 @@ object GHDSolver {
   def getMinFractionalWidthDecomposition(rels: List[Relation]): List[GHDNode] = {
     return getMinFractionalWidthDecomposition(rels, Set[String]())
   }
-
 }
 
 

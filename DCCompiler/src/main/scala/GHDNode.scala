@@ -13,7 +13,7 @@ class Relation(val attrs: List[String]) {
 class GHDNode(val rels: List[Relation]) {
   val attrSet = rels.foldLeft(Set[String]())(
     (accum: Set[String], rel : Relation) => accum | rel.attrs.toSet[String])
-  var children: Option[List[GHDNode]] = None
+  var children: List[GHDNode] = List()
   var subtreeWidth: Int = 0
   var subtreeFractionalWidth: Double = 0
   var bagWidth: Int = 0
@@ -24,15 +24,11 @@ class GHDNode(val rels: List[Relation]) {
     case _ => false
   }
 
-  override def hashCode = 41 * rels.hashCode() + children.fold(0)((l: List[GHDNode]) => l.hashCode())
+  override def hashCode = 41 * rels.hashCode() + children.hashCode()
 
   def scoreTree(): Int = {
     bagWidth = attrSet.size
-    if (!children.isDefined) {
-      return bagWidth
-    }
-    val childrenScore = children.get.map((child: GHDNode) => child.scoreTree()).foldLeft(bagWidth)((accum: Int, x: Int) => if (x > accum) x else accum)
-    return childrenScore
+    return children.map((child: GHDNode) => child.scoreTree()).foldLeft(bagWidth)((accum: Int, x: Int) => if (x > accum) x else accum)
   }
 
   private def getMatrixRow(attr : String, rels : List[Relation]): Array[Double] = {
@@ -53,19 +49,15 @@ class GHDNode(val rels: List[Relation]) {
 
   def fractionalScoreTree() : Double = {
     bagFractionalWidth = fractionalScoreNode()
-    if (!children.isDefined) {
-      return bagFractionalWidth
-    }
-    val childrenScore = children.get.map((child: GHDNode) => child.fractionalScoreTree())
+    return children.map((child: GHDNode) => child.fractionalScoreTree())
       .foldLeft(bagFractionalWidth)((accum: Double, x: Double) => if (x > accum) x else accum)
-    return childrenScore
   }
 
   def toJson(): Json = {
     val relationsJson = jArray(rels.map((rel : Relation) => Json("attrs" -> jArray(rel.attrs.map((str: String) => jString(str))))))
 
-    if (children.isDefined) {
-      return Json("relations" -> relationsJson, "children" -> jArray(children.get.map((child: GHDNode) => child.toJson())))
+    if (!children.isEmpty) {
+      return Json("relations" -> relationsJson, "children" -> jArray(children.map((child: GHDNode) => child.toJson())))
     } else {
       return Json("relations" -> relationsJson)
     }
