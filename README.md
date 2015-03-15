@@ -3,7 +3,6 @@
 This project uses some libraries from Boost, so to build this, you might need to add boost libraries to your include path (something like this: 'export CPATH=$CPATH:/usr/local/boost_1_57_0').
 
 ### TODO:
-* prune tuples (i.e. for triangle query) so every desired result is listed only once
 * implement and benchmark faster pairwise join algorithms (maybe without an index - just sorted merge join outputting a vector of tuples?)
 * implement yannakakis with these faster pairwise join algorithms
 * think about what the theory says about how GenericJoin should behave on a pairwise join (before/after running a full reducer)

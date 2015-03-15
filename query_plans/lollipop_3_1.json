@@ -1,7 +1,7 @@
 {
     "relations": [
         { "attrs": ["a", "b"] },
-        { "attrs": ["b", "c"] },
+        { "attrs": ["b", "c"], "prune": "true" },
         { "attrs": ["c", "a"] }
     ],
     "children": [

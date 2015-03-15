@@ -1,0 +1,8 @@
+{
+    "relations": [
+        { "attrs": ["a", "c"] },
+        { "attrs": ["c", "d"], "prune": "true" },
+        { "attrs": ["d", "a"] },
+        { "attrs": ["a", "b"] }
+    ]
+}
