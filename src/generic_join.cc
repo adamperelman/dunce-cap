@@ -95,9 +95,9 @@ TrieNode* GenericJoinInternal(vector<const TrieNode*>& relations,
 }
 
 
-int GenericJoinCountInternal(vector<const TrieNode*>& relations,
-                             vector<string>::iterator free_attrs_begin,
-                             vector<string>::iterator free_attrs_end) {
+long GenericJoinCountInternal(vector<const TrieNode*>& relations,
+                              vector<string>::iterator free_attrs_begin,
+                              vector<string>::iterator free_attrs_end) {
   if (free_attrs_begin + 1 == free_attrs_end) {
     vector<const vector<int>*> matching_relations = MatchingNodesForAttr(relations,
                                                                          *free_attrs_begin);
@@ -106,7 +106,7 @@ int GenericJoinCountInternal(vector<const TrieNode*>& relations,
 
   /* Pick I to be {first attribute}, J = V \ I */
   TrieNode* L = GenericJoinInternal(relations, free_attrs_begin, free_attrs_begin+1);
-  int count = 0;
+  long count = 0;
   for (int val : L->values()) {
     vector<const TrieNode*> matching_nodes = MatchingNodesForVal(relations,
                                                                  *free_attrs_begin,
@@ -143,7 +143,7 @@ TrieNode* GenericJoin(vector<const TrieNode*>& relations) {
   return GenericJoinInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
 }
 
-int GenericJoinCount(vector<const TrieNode*>& relations) {
+long GenericJoinCount(vector<const TrieNode*>& relations) {
   InitializeScratchSpace(relations);
   vector<string> ordered_attrs = OrderedAttrs(relations);
   return GenericJoinCountInternal(relations, ordered_attrs.begin(), ordered_attrs.end());
