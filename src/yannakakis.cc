@@ -1,7 +1,13 @@
+#include <chrono>
+#include <iostream>
+
 #include "generic_join.h"
 #include "yannakakis.h"
 
 using namespace std;
+
+typedef chrono::high_resolution_clock Clock;
+typedef chrono::milliseconds ms;
 
 void JoinWithinBags(BagNode* root_bag) {
   TrieNode* new_relation = GenericJoin(root_bag->relations);
@@ -83,8 +89,25 @@ long YannakakisCount(BagNode* root_bag) {
     return GenericJoinCount(root_bag->relations);
   }
 
+  Clock::time_point start = Clock::now();
   JoinWithinBags(root_bag);
-  return CountWithChildren(root_bag);
+  Clock::time_point end = Clock::now();
+  ms join_time = chrono::duration_cast<ms>(end - start);
+
+  cout << "performed within-bag joins in "
+       << join_time.count()
+       << "ms" << endl;
+
+  start = Clock::now();
+  long result = CountWithChildren(root_bag);
+  end = Clock::now();
+
+  join_time = chrono::duration_cast<ms>(end - start);
+
+  cout << "performed across-bag joins in "
+       << join_time.count() << "ms" << endl;
+
+  return result;
 }
 
 long YannakakisPairwiseCount(BagNode* root_bag) {
