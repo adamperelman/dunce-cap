@@ -330,32 +330,78 @@ TrieNode* TrieNode::PairwiseJoin(const TrieNode* r1,
   return GenericJoin(relations);
 }
 
-long TrieNode::PairwiseCount(const TrieNode* parent,
-                             const TrieNode* child) {
-  // TODO: currently assumes only 1 attribute is shared
-  // TODO: currently assumes the join attribute is the first
-  //       attribute of each relation
-  long count = 0;
+inline int size_or_one(const TrieNode* node) {
+  return node ? node->size() : 1;
+}
 
-  int parent_i = 0;
-  int child_i = 0;
-  while (parent_i < parent->values_.size() &&
-         child_i < child->values_.size()) {
-    int parent_val = parent->values_.at(parent_i);
-    int child_val = child->values_.at(child_i);
-    if (parent_val == child_val) {
-      count += (parent->children_.at(parent_i)->size()
-                * child->children_.at(child_i)->size());
-      parent_i++;
-      child_i++;
-    } else if (parent_val < child_val) {
-      parent_i++;
+long TrieNode::PairwiseCountInternal(const TrieNode* a,
+                                     const TrieNode* b,
+                                     int num_shared_attrs) {
+  if (num_shared_attrs == 0) {
+    return size_or_one(a) * size_or_one(b);
+  }
+
+  long result = 0;
+  if (a->attr_ < b->attr_) {
+    for (int a_i = 0; a_i < a->children_.size(); a_i++) {
+      result += PairwiseCountInternal(a->children_[a_i].get(),
+                                      b,
+                                      num_shared_attrs);
+    }
+    return result;
+  }
+
+  if (a->attr_ > b->attr_) {
+    for (int b_i = 0; b_i < b->children_.size(); b_i++) {
+      result += PairwiseCountInternal(a,
+                                      b->children_[b_i].get(),
+                                      num_shared_attrs);
+    }
+    return result;
+  }
+
+  // The two attributes are equal.
+  int a_i = 0;
+  int b_i = 0;
+  while (a_i < a->values_.size() &&
+         b_i < b->values_.size()) {
+    int a_val = a->values_.at(a_i);
+    int b_val = b->values_.at(b_i);
+    if (a_val == b_val) {
+      result += PairwiseCountInternal(a->children_.at(a_i).get(),
+                                      b->children_.at(b_i).get(),
+                                      num_shared_attrs - 1);
+      a_i++;
+      b_i++;
+    } else if (a_val < b_val) {
+      a_i++;
     } else {
-      child_i++;
+      b_i++;
     }
   }
 
-  return count;
+  return result;
+}
+
+long TrieNode::PairwiseCount(const TrieNode* a,
+                             const TrieNode* b) {
+  int num_shared_attrs = 0;
+  const TrieNode* a_child = a;
+  const TrieNode* b_child = b;
+  while (a_child && b_child) {
+    if (a_child->attr_ == b_child->attr_) {
+      num_shared_attrs++;
+      a_child = a_child->children_[0].get();
+      b_child = b_child->children_[0].get();
+    } else if (a_child->attr_ < b_child->attr_) {
+      a_child = a_child->children_[0].get();
+    } else {
+      b_child = b_child->children_[0].get();
+    }
+  }
+
+
+  return PairwiseCountInternal(a, b, num_shared_attrs);
 }
 
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {

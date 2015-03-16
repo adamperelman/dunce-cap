@@ -43,8 +43,8 @@ BagNode* BuildPlanTree(string plan_file, string data_file) {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 3) {
-    cout << "Usage: ./run_plan.exe <plan file> <data file>" << endl;
+  if (argc != 3 && argc != 4) {
+    cout << "Usage: ./run_plan.exe <plan file> <data file> [pairwise]" << endl;
     exit(0);
   }
 
@@ -56,8 +56,15 @@ int main(int argc, char* argv[]) {
   typedef chrono::high_resolution_clock Clock;
   typedef chrono::milliseconds ms;
 
-  Clock::time_point start_join = Clock::now();
-  long result = YannakakisCount(root_bag.get());
+  Clock::time_point start_join;
+  long result;
+  if (argc == 4 && string(argv[3]) == string("pairwise")) {
+    start_join = Clock::now();
+    result = YannakakisPairwiseCount(root_bag.get());
+  } else {
+    start_join = Clock::now();
+    result = YannakakisCount(root_bag.get());
+  }
   Clock::time_point end_join = Clock::now();
 
   cout << "done performing join" << endl;

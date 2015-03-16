@@ -78,6 +78,10 @@ private:
   std::vector<int> values_;
   std::vector<std::unique_ptr<TrieNode>> children_;
 
+  static long PairwiseCountInternal(const TrieNode* a,
+                                    const TrieNode* b,
+                                    int num_shared_attrs);
+
   friend std::ostream& operator<<(std::ostream& os, const TrieNode& rel);
 };
 
