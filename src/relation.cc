@@ -337,6 +337,12 @@ inline int size_or_one(const TrieNode* node) {
 long TrieNode::PairwiseCountInternal(const TrieNode* a,
                                      const TrieNode* b,
                                      int num_shared_attrs) {
+  // TODO: this is really slow unless the attribute ordering
+  // is lucky
+  // (since we might have to scan one of the relation
+  // once for each of the children of the other
+  // relation!!)
+  // we should make this faster!
   if (num_shared_attrs == 0) {
     return size_or_one(a) * size_or_one(b);
   }
