@@ -56,13 +56,17 @@ class GHDNode(val rels: List[Relation]) {
       .foldLeft(bagFractionalWidth)((accum: Double, x: Double) => if (x > accum) x else accum)
   }
 
-  def toJson(): Json = {
-    val relationsJson = jArray(rels.map((rel : Relation) => Json("attrs" -> jArray(rel.attrs.map((str: String) => jString(str))))))
+  private def toJson(reorderFn: (String => String)): Json = {
+    val relationsJson = jArray(rels.map((rel : Relation) => Json("attrs" -> jArray(rel.attrs.map((str: String) => jString(reorderFn(str)))))))
     if (!children.isEmpty) {
-      return Json("relations" -> relationsJson, "children" -> jArray(children.map((child: GHDNode) => child.toJson())))
+      return Json("relations" -> relationsJson, "children" -> jArray(children.map((child: GHDNode) => child.toJson(reorderFn))))
     } else {
       return Json("relations" -> relationsJson)
     }
+  }
+
+  def toJson(): Json = {
+    return toJson(translateAttribute)
   }
 
   private def getAttributeReordering(reordering : Map[String, Int], newAttrName : Int): (Map[String, Int], Int) = {
@@ -79,6 +83,6 @@ class GHDNode(val rels: List[Relation]) {
   }
 
   private def translateAttribute(attr : String) = {
-    attributeReordering.fold(attr)((reordering: Map[String, Int]) => "attr_" + reordering.get(attr).toString)
+    attributeReordering.fold(attr)((reordering: Map[String, Int]) => "attr_" + reordering.get(attr).get.toString)
   }
 }
