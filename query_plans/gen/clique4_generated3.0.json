@@ -1,0 +1,54 @@
+{
+  "relations" : [
+    {
+      "attrs" : [
+        "attr_1",
+        "attr_3"
+      ]
+    },
+    {
+      "attrs" : [
+        "attr_0",
+        "attr_3"
+      ]
+    },
+    {
+      "attrs" : [
+        "attr_3",
+        "attr_2"
+      ]
+    }
+  ],
+  "children" : [
+    {
+      "relations" : [
+        {
+          "attrs" : [
+            "attr_2",
+            "attr_0"
+          ]
+        }
+      ]
+    },
+    {
+      "relations" : [
+        {
+          "attrs" : [
+            "attr_0",
+            "attr_1"
+          ]
+        }
+      ]
+    },
+    {
+      "relations" : [
+        {
+          "attrs" : [
+            "attr_1",
+            "attr_2"
+          ]
+        }
+      ]
+    }
+  ]
+}
