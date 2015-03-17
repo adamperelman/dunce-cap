@@ -1,20 +1,12 @@
 ***ARXIV-GR DATASET***
-488852 paths of length 2
-
-9387008 4-cycles
-*sqlite:
-*generic join: 1100ms
-
-391975461 tadpoles (4-cycle with tail of length 1)
-*sqlite: 57s
-*GenericJoin (no Y): 21s
-*Y with pairwise performed by GJ: 20s
-
-341766305 lollipops (4-clique with tail of length1)
+341755386 (=56959231 * 6) lollipops (4-clique with tail of length1)
 *sqlite: 11m 45s
-*Y with pairwise performed by GJ: 1030ms
+*YCount: 525ms
 
 
 ***FACEBOOK DATASET***
 720112032 4-cliques
-*GenericJoinCount: 32218ms
+*GenericJoinCount: 31431ms
+
+121536142140 (= 20256023690 * 6) lollipops (4-clique w tail of length 1)
+*YCount: 17606ms

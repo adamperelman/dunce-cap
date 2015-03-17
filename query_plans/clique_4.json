@@ -1,10 +1,28 @@
 {
     "relations": [
-        { "attrs": ["a", "b"] },
-        { "attrs": ["b", "c"] },
-        { "attrs": ["c", "d"] },
-        { "attrs": ["d", "a"] },
-        { "attrs": ["a", "c"] },
-        { "attrs": ["b", "d"] }
+        {
+            "attrs": ["a", "b"],
+            "prune": "true"
+        },
+        {
+            "attrs": ["b", "c"],
+            "prune": "true"
+        },
+        {
+            "attrs": ["c", "d"],
+            "prune": "true"
+        },
+        {
+            "attrs": ["d", "a"],
+            "prune": "true"
+        },
+        {
+            "attrs": ["a", "c"],
+            "prune": "true"
+        },
+        {
+            "attrs": ["b", "d"],
+            "prune": "true"
+        }
     ]
 }

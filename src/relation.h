@@ -12,16 +12,18 @@
 
 class TrieNode {
 public:
-  TrieNode(const std::string& attr) : attr_(attr), values_(new std::vector<int>) {}
-  TrieNode(const std::string& attr, std::vector<int>* values) : attr_(attr), values_(values), children_(values->size()) {}
+  TrieNode(const std::string& attr) : attr_(attr), values_() {}
+  TrieNode(const std::string& attr, std::vector<int> values) : attr_(attr), values_(values), children_(values.size()) {}
 
-  static TrieNode* FromFile(const std::string& filename, std::vector<std::string> attrs);
+  static TrieNode* FromFile(const std::string& filename,
+                            std::vector<std::string> attrs,
+                            bool prune=false);
 
   static TrieNode* PairwiseJoin(const TrieNode* r1,
                                 const TrieNode* r2);
 
-  static int PairwiseCount(const TrieNode* parent,
-                           const TrieNode* child);
+  static long PairwiseCount(const TrieNode* parent,
+                            const TrieNode* child);
 
   std::vector<std::string> attrs() const;
 
@@ -42,7 +44,7 @@ public:
   // val: the value it should get bound to
   const TrieNode* MatchingNode(const std::string& attr, int val) const;
 
-  const std::vector<int>* values() const { return values_.get(); }
+  const std::vector<int>& values() const { return values_; }
   const std::string& attr() const { return attr_; }
   const std::vector<std::unique_ptr<TrieNode>>& children() const { return children_; }
   void AddChildNode(int value, TrieNode* child_ptr);
@@ -73,8 +75,12 @@ public:
 
 private:
   std::string attr_;
-  std::unique_ptr<std::vector<int>> values_;
+  std::vector<int> values_;
   std::vector<std::unique_ptr<TrieNode>> children_;
+
+  static long PairwiseCountInternal(const TrieNode* a,
+                                    const TrieNode* b,
+                                    int num_shared_attrs);
 
   friend std::ostream& operator<<(std::ostream& os, const TrieNode& rel);
 };

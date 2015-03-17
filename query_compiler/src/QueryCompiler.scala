@@ -76,5 +76,7 @@ object QueryCompiler extends App {
     val writer = new PrintWriter(args(0))
     writer.write(generateCode(attrs, relations))
     writer.close()
+
+    println("done generating code")
   }
 }

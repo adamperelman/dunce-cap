@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <memory>
 #include <unordered_map>
+#include <stdexcept>
 
 #include "relation.h"
 #include "generic_join.h"
@@ -18,7 +19,7 @@ struct tuple_hash {
   }
 };
 
-TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
+TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs, bool prune) {
   vector<pair<string, int>> attrs_with_indexes;
   for (int i = 0; i < attrs.size(); i++) {
     attrs_with_indexes.push_back(make_pair(attrs[i], i));
@@ -31,6 +32,8 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
   ifstream ifs(filename);
   string line;
   while (getline(ifs, line)) {
+    if (line[0] == '#') continue;
+
     istringstream iss(line);
     int temp;
     vector<int> tuple;
@@ -42,6 +45,10 @@ TrieNode* TrieNode::FromFile(const string& filename, vector<string> attrs) {
     for (int i = 0; i < tuple.size(); i++) {
       int index = attrs_with_indexes[i].second;
       ordered_tuple.push_back(tuple[index]);
+    }
+
+    if (prune && !is_sorted(ordered_tuple.begin(), ordered_tuple.end())) {
+      continue;
     }
 
     if (ordered_tuple.size() != attrs.size()) {
@@ -92,7 +99,7 @@ ostream& operator<<(ostream& os, const TrieNode& rel) {
 
 int TrieNode::size() const {
   int result = 0;
-  for (int i = 0; i < values_->size(); i++) {
+  for (int i = 0; i < values_.size(); i++) {
     const unique_ptr<TrieNode>& child_ptr = children_[i];
     if (child_ptr) {
       result += child_ptr->size();
@@ -110,14 +117,14 @@ const TrieNode* TrieNode::MatchingNode(const std::string& attr, int val) const {
   }
 
   // We're binding this node's attribute now, so we only want a subset of our values.
-  auto val_ptr = lower_bound(values_->begin(), values_->end(), val);
+  auto val_ptr = lower_bound(values_.begin(), values_.end(), val);
 
   // If we're searching for a matching node, that implies that
   // this value must have been in the intersection of values
   // for this attribute, so it must be present.
   assert(*val_ptr == val);
 
-  int index = val_ptr - values_->begin();
+  int index = val_ptr - values_.begin();
   return children_[index].get();
 }
 
@@ -128,11 +135,11 @@ void TrieNode::InsertTuple(vector<int>::iterator tuple_start,
   assert(tuple_end - tuple_start == attr_end - attr_start);
   assert(attr_ == *attr_start);
 
-  auto val_ptr = lower_bound(values_->begin(), values_->end(), *tuple_start);
-  int index = val_ptr - values_->begin();
+  auto val_ptr = lower_bound(values_.begin(), values_.end(), *tuple_start);
+  int index = val_ptr - values_.begin();
 
-  if (val_ptr == values_->end() || *val_ptr != *tuple_start) {
-    values_->insert(val_ptr, *tuple_start);
+  if (val_ptr == values_.end() || *val_ptr != *tuple_start) {
+    values_.insert(val_ptr, *tuple_start);
 
     if (tuple_start+1 != tuple_end) {
       children_.insert(children_.begin()+index,
@@ -155,14 +162,14 @@ void TrieNode::AppendTuple(vector<int>::const_iterator tuple_start,
   assert(tuple_end - tuple_start == attr_end - attr_start);
   assert(attr_ == *attr_start);
 
-  if (values_->empty() || *tuple_start > values_->back()) {
-    values_->push_back(*tuple_start);
+  if (values_.empty() || *tuple_start > values_.back()) {
+    values_.push_back(*tuple_start);
     if (tuple_start+1 != tuple_end) {
       children_.push_back(unique_ptr<TrieNode>(new TrieNode(*(attr_start+1))));
     } else {
       children_.push_back(unique_ptr<TrieNode>(nullptr));
     }
-  } else if (*tuple_start != values_->back()) {
+  } else if (*tuple_start != values_.back()) {
     throw runtime_error("Cannot call AppendTuple for tuple out of nondecreasing order");
   }
 
@@ -176,13 +183,13 @@ bool TrieNode::contains(const vector<int>& tuple) const {
     throw runtime_error("tuple passed to contains() is too short");
   }
 
-  auto val_ptr = lower_bound(values_->begin(), values_->end(), tuple[0]);
+  auto val_ptr = lower_bound(values_.begin(), values_.end(), tuple[0]);
   if (*val_ptr != tuple[0]) {
     // lower_bound() didn't find a match.
     return false;
   }
 
-  int index = val_ptr - values_->begin();
+  int index = val_ptr - values_.begin();
   const auto& child_ptr = children_[index];
 
   if (child_ptr) {
@@ -199,10 +206,10 @@ bool TrieNode::contains(const vector<int>& tuple) const {
 
 
 void TrieNode::AddChildNode(int value, TrieNode* child_ptr) {
-  assert(values_->empty() || value > values_->back());
-  values_->push_back(value);
+  assert(values_.empty() || value > values_.back());
+  values_.push_back(value);
   children_.push_back(unique_ptr<TrieNode>(child_ptr));
-  assert(values_->size() == children_.size());
+  assert(values_.size() == children_.size());
 }
 
 pair<vector<int>, vector<int>> TrieNode::SharedAttributeIndexes(const TrieNode* other) const {
@@ -323,30 +330,84 @@ TrieNode* TrieNode::PairwiseJoin(const TrieNode* r1,
   return GenericJoin(relations);
 }
 
-int TrieNode::PairwiseCount(const TrieNode* parent,
-                            const TrieNode* child) {
-  // TODO: currently assumes only 1 attribute is shared
-  // TODO: currently assumes the join attribute is the first
-  //       attribute of each relation
-  int count = 0;
+inline int size_or_one(const TrieNode* node) {
+  return node ? node->size() : 1;
+}
 
-  int parent_i = 0;
-  int child_i = 0;
-  while (parent_i < parent->values_->size() &&
-         child_i < child->values_->size()) {
-    int parent_val = parent->values_->at(parent_i);
-    int child_val = child->values_->at(child_i);
-    if (parent_val == child_val) {
-      count += (parent->children_.at(parent_i++)->size()
-                * child->children_.at(child_i++)->size());
-    } else if (parent_val < child_val) {
-      parent_i++;
+long TrieNode::PairwiseCountInternal(const TrieNode* a,
+                                     const TrieNode* b,
+                                     int num_shared_attrs) {
+  // TODO: this is really slow unless the attribute ordering
+  // is lucky
+  // (since we might have to scan one of the relation
+  // once for each of the children of the other
+  // relation!!)
+  // we should make this faster!
+  if (num_shared_attrs == 0) {
+    return size_or_one(a) * size_or_one(b);
+  }
+
+  long result = 0;
+  if (a->attr_ < b->attr_) {
+    for (int a_i = 0; a_i < a->children_.size(); a_i++) {
+      result += PairwiseCountInternal(a->children_[a_i].get(),
+                                      b,
+                                      num_shared_attrs);
+    }
+    return result;
+  }
+
+  if (a->attr_ > b->attr_) {
+    for (int b_i = 0; b_i < b->children_.size(); b_i++) {
+      result += PairwiseCountInternal(a,
+                                      b->children_[b_i].get(),
+                                      num_shared_attrs);
+    }
+    return result;
+  }
+
+  // The two attributes are equal.
+  int a_i = 0;
+  int b_i = 0;
+  while (a_i < a->values_.size() &&
+         b_i < b->values_.size()) {
+    int a_val = a->values_.at(a_i);
+    int b_val = b->values_.at(b_i);
+    if (a_val == b_val) {
+      result += PairwiseCountInternal(a->children_.at(a_i).get(),
+                                      b->children_.at(b_i).get(),
+                                      num_shared_attrs - 1);
+      a_i++;
+      b_i++;
+    } else if (a_val < b_val) {
+      a_i++;
     } else {
-      child_i++;
+      b_i++;
     }
   }
 
-  return count;
+  return result;
+}
+
+long TrieNode::PairwiseCount(const TrieNode* a,
+                             const TrieNode* b) {
+  int num_shared_attrs = 0;
+  const TrieNode* a_child = a;
+  const TrieNode* b_child = b;
+  while (a_child && b_child) {
+    if (a_child->attr_ == b_child->attr_) {
+      num_shared_attrs++;
+      a_child = a_child->children_[0].get();
+      b_child = b_child->children_[0].get();
+    } else if (a_child->attr_ < b_child->attr_) {
+      a_child = a_child->children_[0].get();
+    } else {
+      b_child = b_child->children_[0].get();
+    }
+  }
+
+
+  return PairwiseCountInternal(a, b, num_shared_attrs);
 }
 
 TrieNode::const_iterator::const_iterator(const TrieNode* root) {
@@ -354,14 +415,14 @@ TrieNode::const_iterator::const_iterator(const TrieNode* root) {
   while (current_node) {
     // TODO: this assumes that all nodes have size > 0; is this true??
     node_indexes_.push(make_pair(current_node, 0));
-    current_tuple_.push_back(current_node->values()->at(0));
+    current_tuple_.push_back(current_node->values().at(0));
     current_node = current_node->children().at(0).get();
   }
 }
 
 TrieNode::const_iterator& TrieNode::const_iterator::operator++() {
   // Pop off nodes with no more values.
-  while (node_indexes_.top().second == node_indexes_.top().first->values()->size() - 1) {
+  while (node_indexes_.top().second == node_indexes_.top().first->values().size() - 1) {
     node_indexes_.pop();
     current_tuple_.pop_back();
     if (node_indexes_.empty()) {
@@ -372,12 +433,12 @@ TrieNode::const_iterator& TrieNode::const_iterator::operator++() {
 
   // Increment our current node's index.
   node_indexes_.top().second++;
-  current_tuple_.back() = node_indexes_.top().first->values()->at(node_indexes_.top().second);
+  current_tuple_.back() = node_indexes_.top().first->values().at(node_indexes_.top().second);
 
   // Walk down to child (if possible).
   while (const TrieNode* child = node_indexes_.top().first->children()[node_indexes_.top().second].get()) {
     node_indexes_.push(make_pair(child, 0));
-    current_tuple_.push_back(child->values()->at(0));
+    current_tuple_.push_back(child->values().at(0));
   }
 
   return *this;

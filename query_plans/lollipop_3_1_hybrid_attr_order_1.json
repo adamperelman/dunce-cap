@@ -1,0 +1,14 @@
+{
+    "relations": [
+        { "attrs": ["b", "c"] , "prune": "true"},
+        { "attrs": ["c", "d"] },
+        { "attrs": ["d", "b"] }
+    ],
+    "children": [
+        {
+            "relations": [
+                { "attrs": ["a", "d"] }
+            ]
+        }
+    ]
+}

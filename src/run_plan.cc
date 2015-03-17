@@ -18,7 +18,9 @@ BagNode* BuildPlanSubtree(picojson::value v, string data_file) {
     for (const picojson::value& attr : rel.get("attrs").get<picojson::array>()) {
       attrs.push_back(attr.get<string>());
     }
-    bag_node->relations.push_back(TrieNode::FromFile(data_file, attrs));
+    bool prune = (rel.get("prune").is<string>() &&
+                  rel.get("prune").get<string>() == "true");
+    bag_node->relations.push_back(TrieNode::FromFile(data_file, attrs, prune));
   }
   const picojson::value& children = v.get("children");
   if (children.is<picojson::array>()) {
@@ -41,8 +43,8 @@ BagNode* BuildPlanTree(string plan_file, string data_file) {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 3) {
-    cout << "Usage: ./run_plan.exe <plan file> <data file>" << endl;
+  if (argc != 3 && argc != 4) {
+    cout << "Usage: ./run_plan.exe <plan file> <data file> [pairwise]" << endl;
     exit(0);
   }
 
@@ -54,8 +56,15 @@ int main(int argc, char* argv[]) {
   typedef chrono::high_resolution_clock Clock;
   typedef chrono::milliseconds ms;
 
-  Clock::time_point start_join = Clock::now();
-  int result = YannakakisCount(root_bag.get());
+  Clock::time_point start_join;
+  long result;
+  if (argc == 4 && string(argv[3]) == string("pairwise")) {
+    start_join = Clock::now();
+    result = YannakakisPairwiseCount(root_bag.get());
+  } else {
+    start_join = Clock::now();
+    result = YannakakisCount(root_bag.get());
+  }
   Clock::time_point end_join = Clock::now();
 
   cout << "done performing join" << endl;

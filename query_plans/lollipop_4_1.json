@@ -1,16 +1,34 @@
 {
     "relations": [
-        { "attrs": ["a", "b"] },
-        { "attrs": ["b", "c"] },
-        { "attrs": ["c", "d"] },
-        { "attrs": ["d", "a"] },
-        { "attrs": ["a", "c"] },
-        { "attrs": ["b", "d"] }
+        {
+            "attrs": ["a", "b"]
+        },
+        {
+            "attrs": ["d", "a"]
+        },
+        {
+            "attrs": ["a", "c"]
+        },
+        {
+            "attrs": ["b", "c"],
+            "prune": "true"
+        },
+        {
+            "attrs": ["c", "d"],
+            "prune": "true"
+        },
+
+        {
+            "attrs": ["b", "d"],
+            "prune": "true"
+        }
     ],
     "children": [
         {
             "relations": [
-                { "attrs": ["a", "e"] }
+                {
+                    "attrs": ["a", "e"]
+                }
             ]
         }
     ]
