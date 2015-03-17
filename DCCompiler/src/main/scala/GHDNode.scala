@@ -1,6 +1,7 @@
 package DCCompiler
 
 import java.util
+import scala.collection.immutable.TreeSet
 
 import argonaut.Argonaut._
 import argonaut.Json
@@ -11,13 +12,15 @@ class Relation(val attrs: List[String]) {
 }
 
 class GHDNode(val rels: List[Relation]) {
-  val attrSet = rels.foldLeft(Set[String]())(
-    (accum: Set[String], rel : Relation) => accum | rel.attrs.toSet[String])
+  val attrSet = rels.foldLeft(TreeSet[String]())(
+    (accum: TreeSet[String], rel : Relation) => accum | TreeSet[String](rel.attrs : _*))
   var children: List[GHDNode] = List()
   var subtreeWidth: Int = 0
   var subtreeFractionalWidth: Double = 0
   var bagWidth: Int = 0
   var bagFractionalWidth: Double = 0
+  var attributeReordering : Option[Map[String, Int]] = None
+  final val ATTRIBUTE_NUMBERING_START = 0
 
   override def equals(o: Any) = o match {
     case that: GHDNode => that.rels.equals(rels) && that.children.equals(children)
@@ -55,11 +58,27 @@ class GHDNode(val rels: List[Relation]) {
 
   def toJson(): Json = {
     val relationsJson = jArray(rels.map((rel : Relation) => Json("attrs" -> jArray(rel.attrs.map((str: String) => jString(str))))))
-
     if (!children.isEmpty) {
       return Json("relations" -> relationsJson, "children" -> jArray(children.map((child: GHDNode) => child.toJson())))
     } else {
       return Json("relations" -> relationsJson)
     }
+  }
+
+  private def getAttributeReordering(reordering : Map[String, Int], newAttrName : Int): (Map[String, Int], Int) = {
+    val newAttrs : Set[String] = attrSet.filter((attr : String) => !reordering.contains(attr))
+    val (newReordering, updatedNewAttrName) = newAttrs.foldLeft(
+        (reordering, newAttrName))((accum: (Map[String, Int], Int), origAttrName: String) => (accum._1 + (origAttrName -> accum._2), accum._2 +1))
+    return children.foldLeft(
+      (newReordering, updatedNewAttrName))((accum: (Map[String, Int], Int), child : GHDNode) => child.getAttributeReordering(
+        accum._1, accum._2))
+  }
+
+  def reorderAttributes() = {
+    attributeReordering = Some(getAttributeReordering(Map(), ATTRIBUTE_NUMBERING_START)._1)
+  }
+
+  private def translateAttribute(attr : String) = {
+    attributeReordering.fold(attr)((reordering: Map[String, Int]) => "attr_" + reordering.get(attr).toString)
   }
 }

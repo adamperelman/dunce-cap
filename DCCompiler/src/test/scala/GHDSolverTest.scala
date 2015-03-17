@@ -22,6 +22,7 @@ class GHDSolverTest extends FunSuite {
     new Relation(List("b", "d", "f", "g", "h")),
     new Relation(List("f", "g", "h", "k", "b")),
     new Relation(List("f", "g", "h", "n", "b")))
+
   final val solver = GHDSolver
 
   test("Can identify connected components of graph when removing the chosen hyper edge leaves 2 disconnected components") {
@@ -130,5 +131,33 @@ class GHDSolverTest extends FunSuite {
 
     val fractionalScores = decompositions.map((root: GHDNode) => root.fractionalScoreTree())
     assert(fractionalScores.min === 1.5)
+  }
+
+  test("Can correctly reorder attributes") {
+    val decomp1 = new GHDNode(List(TADPOLE(0)))
+    val decomp1Child1 = new GHDNode(List(TADPOLE(1), TADPOLE(2)))
+    val decomp1Child2 = new GHDNode(List(TADPOLE(3)))
+    decomp1.children = List(decomp1Child1, decomp1Child2)
+    decomp1.reorderAttributes()
+    assert(decomp1.attributeReordering.get("a") == 0)
+    assert(decomp1.attributeReordering.get("b") == 1)
+    assert(decomp1.attributeReordering.get("c") == 2)
+    assert(decomp1.attributeReordering.get("e") == 3)
+
+    val deeperTree = new GHDNode(List(new Relation(List("a", "b", "c"))))
+    val left = new GHDNode(List(new Relation(List("b", "e"))))
+    val right = new GHDNode(List(new Relation(List("c", "d"))))
+    val leftLeft = new GHDNode(List(new Relation(List("b", "f"))))
+    val leftRight = new GHDNode(List(new Relation((List("e", "g")))))
+    deeperTree.children = List(left, right)
+    left.children = List(leftLeft, leftRight)
+    deeperTree.reorderAttributes()
+    assert(deeperTree.attributeReordering.get("a") == 0)
+    assert(deeperTree.attributeReordering.get("b") == 1)
+    assert(deeperTree.attributeReordering.get("c") == 2)
+    assert(deeperTree.attributeReordering.get("e") == 3)
+    assert(deeperTree.attributeReordering.get("f") == 4)
+    assert(deeperTree.attributeReordering.get("g") == 5)
+    assert(deeperTree.attributeReordering.get("d") == 6)
   }
 }
