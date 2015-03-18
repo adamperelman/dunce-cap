@@ -4,3 +4,4 @@ This project uses some libraries from Boost, so to build this, you might need to
 
 ### TODO:
 * parallelize using OpenMP tasks: http://en.wikibooks.org/wiki/OpenMP/Tasks
+* cleanup JSON files: prune should be a literal bool, not a string
