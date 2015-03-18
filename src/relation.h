@@ -37,7 +37,7 @@ public:
                    std::vector<std::string>::const_iterator attr_start,
                    std::vector<std::string>::const_iterator attr_end);
 
-  int size() const; // TODO change this to cache size in each trienode
+  long size() const;
   bool contains(const std::vector<int>& tuple) const;
 
   // attr: the attribute to bind to a value

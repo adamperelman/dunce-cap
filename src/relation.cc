@@ -97,8 +97,8 @@ ostream& operator<<(ostream& os, const TrieNode& rel) {
 }
 
 
-int TrieNode::size() const {
-  int result = 0;
+long TrieNode::size() const {
+  long result = 0;
   for (int i = 0; i < values_.size(); i++) {
     const unique_ptr<TrieNode>& child_ptr = children_[i];
     if (child_ptr) {
