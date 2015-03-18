@@ -330,7 +330,7 @@ TrieNode* TrieNode::PairwiseJoin(const TrieNode* r1,
   return GenericJoin(relations);
 }
 
-inline int size_or_one(const TrieNode* node) {
+inline long size_or_one(const TrieNode* node) {
   return node ? node->size() : 1;
 }
 
